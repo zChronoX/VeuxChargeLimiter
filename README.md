@@ -49,16 +49,16 @@ carica a una soglia, ne limita la velocità e la sospende se la batteria si scal
 
 | | |
 |---|---|
-| 🔋 **Ciclo con isteresi** | La carica si ferma alla soglia massima (default 80%) e riparte alla minima (default 20%), o subito quando colleghi il cavo. |
-| ⚡ **Corrente limitata** | Default 2500 mA (~11 W): carica più fresca. `0` = velocità originale 67 W. |
-| 🌡️ **Protezione termica a due livelli** | Sopra i 36 °C la corrente scende a 1500 mA; a 39 °C la carica si ferma e riparte sotto i 35 °C. |
-| ⏰ **Carica smart** | Di notte resta all'80% e arriva al 100% giusto in tempo per la sveglia. |
-| 💯 **100% una tantum** | Quando ti serve il telefono pieno: si disattiva da solo al 100% (o dopo 24 h). |
-| 📊 **Statistiche** | Consumo a schermo acceso/spento, autonomia stimata, cicli equivalenti, storico della salute. |
-| 📱 **WebUI Material 3 Expressive** | Stato live, grafici, statistiche, impostazioni e log, con i colori dinamici del tuo telefono. |
-| 🔔 **Notifiche** | Soglia raggiunta, pausa termica, carica smart, batteria in emergenza. |
-| 🛟 **Sicurezza** | Nulla viene toccato prima del boot completo; paracadute al 15%; si disattiva da solo se causa riavvii. |
-| 🔄 **Aggiornamenti** | L'app root ti avvisa delle nuove versioni (`updateJson`). |
+|  **Ciclo con isteresi** | La carica si ferma alla soglia massima (default 80%) e riparte alla minima (default 20%), o subito quando colleghi il cavo. |
+|  **Corrente limitata** | Default 2500 mA (~11 W): carica più fresca. `0` = velocità originale 67 W. |
+|  **Protezione termica a due livelli** | Sopra i 36 °C la corrente scende a 1500 mA; a 39 °C la carica si ferma e riparte sotto i 35 °C. |
+|  **Carica smart** | Di notte resta all'80% e arriva al 100% giusto in tempo per la sveglia. |
+|  **100% una tantum** | Quando ti serve il telefono pieno: si disattiva da solo al 100% (o dopo 24 h). |
+|  **Statistiche** | Consumo a schermo acceso/spento, autonomia stimata, cicli equivalenti, storico della salute. |
+|  **WebUI Material 3 Expressive** | Stato live, grafici, statistiche, impostazioni e log, con i colori dinamici del tuo telefono. |
+|  **Notifiche** | Soglia raggiunta, pausa termica, carica smart, batteria in emergenza. |
+|  **Sicurezza** | Nulla viene toccato prima del boot completo; paracadute al 15%; si disattiva da solo se causa riavvii. |
+|  **Aggiornamenti** | L'app root ti avvisa delle nuove versioni (`updateJson`). |
 
 ## Compatibilità
 
