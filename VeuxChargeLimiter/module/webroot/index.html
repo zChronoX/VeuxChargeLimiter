@@ -1,0 +1,1320 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="color-scheme" content="light dark">
+<title>Charge Limiter</title>
+<!-- Colori dinamici (Monet) e margini di sistema forniti da KernelSU / APatch / WebUI X.
+     In un browser normale questi file non esistono e si usano i colori di riserva. -->
+<link rel="stylesheet" href="https://mui.kernelsu.org/internal/colors.css">
+<link rel="stylesheet" href="https://mui.kernelsu.org/internal/insets.css">
+<style>
+/* =============================================================================
+   Material 3 Expressive — token di sistema
+   ========================================================================== */
+:root {
+  color-scheme: light;
+  --md-primary: var(--primary, #376948);
+  --md-on-primary: var(--onPrimary, #e8ffea);
+  --md-primary-container: var(--primaryContainer, #b8f0c6);
+  --md-on-primary-container: var(--onPrimaryContainer, #295b3c);
+  --md-secondary: var(--secondary, #506454);
+  --md-on-secondary: var(--onSecondary, #e8ffea);
+  --md-secondary-container: var(--secondaryContainer, #d2e8d4);
+  --md-on-secondary-container: var(--onSecondaryContainer, var(--on-secondaryContainer, #435647));
+  --md-tertiary: var(--tertiary, #576434);
+  --md-on-tertiary: var(--onTertiary, #f2ffc9);
+  --md-tertiary-container: var(--tertiaryContainer, #eefebf);
+  --md-on-tertiary-container: var(--onTertiaryContainer, #556232);
+  --md-error: var(--error, #a83836);
+  --md-on-error: var(--onError, #fff7f6);
+  --md-error-container: var(--errorContainer, #fa746f);
+  --md-on-error-container: var(--onErrorContainer, #6e0a12);
+  --md-background: var(--background, #f7faf4);
+  --md-on-background: var(--onBackground, #2c342d);
+  --md-surface: var(--surface, #f7faf4);
+  --md-on-surface: var(--onSurface, #2c342d);
+  --md-surface-variant: var(--surfaceVariant, #dce5db);
+  --md-on-surface-variant: var(--onSurfaceVariant, #586159);
+  --md-surface-container-lowest: var(--surfaceContainerLowest, #ffffff);
+  --md-surface-container-low: var(--surfaceContainerLow, #f0f5ed);
+  --md-surface-container: var(--surfaceContainer, #e9f0e7);
+  --md-surface-container-high: var(--surfaceContainerHigh, #e3eae1);
+  --md-surface-container-highest: var(--surfaceContainerHighest, #dce5db);
+  --md-surface-bright: var(--surfaceBright, #f7faf4);
+  --md-surface-dim: var(--surfaceDim, #d3dcd2);
+  --md-outline: var(--outline, #747d74);
+  --md-outline-variant: var(--outlineVariant, #abb4ab);
+  --md-inverse-surface: var(--inverseSurface, #0b0f0c);
+  --md-inverse-on-surface: var(--inverseOnSurface, #9a9e99);
+  --md-inverse-primary: var(--inversePrimary, #c3fbd0);
+
+  /* Forma (corner tokens, M3 Expressive) */
+  --shape-xs: 4px;  --shape-sm: 8px;  --shape-md: 12px;  --shape-lg: 16px;
+  --shape-lg-inc: 20px;  --shape-xl: 28px;  --shape-xl-inc: 32px;  --shape-xxl: 48px;
+  --shape-full: 9999px;
+
+  /* Movimento: molle dello schema Expressive convertite in linear() */
+  --md-motion-fast-spatial: linear(0, 0.0505, 0.1611, 0.3185, 0.487, 0.6346, 0.7763, 0.8915, 0.9721, 1.034, 1.072, 1.0896, 1.0944, 1.0888, 1.0779, 1.0628, 1.0469, 1.0331, 1.0199, 1.0093, 1.0019, 0.9963, 0.9929, 0.9914, 0.9911, 0.9917, 0.9928, 0.9942, 0.9957, 0.997, 0.9982, 0.9992, 0.9999, 1.0004, 1.0007, 1.0008, 1); /* 420ms, picco 1.094 */
+  --md-motion-fast-spatial-dur: 420ms;
+  --md-motion-default-spatial: linear(0, 0.0283, 0.0982, 0.2, 0.3056, 0.4124, 0.5145, 0.608, 0.6968, 0.7674, 0.8267, 0.8753, 0.9143, 0.9467, 0.9694, 0.9861, 0.998, 1.006, 1.0113, 1.0139, 1.015, 1.0148, 1.014, 1.0127, 1.011, 1.0094, 1.0078, 1.0064, 1.0051, 1.0039, 1.0029, 1.0021, 1.0015, 1.001, 1.0006, 1.0003, 1); /* 475ms, picco 1.015 */
+  --md-motion-default-spatial-dur: 475ms;
+  --md-motion-slow-spatial: linear(0, 0.0284, 0.0988, 0.1991, 0.3051, 0.4124, 0.5149, 0.6088, 0.6962, 0.7672, 0.8268, 0.8756, 0.9146, 0.9466, 0.9694, 0.9862, 0.9981, 1.0061, 1.0114, 1.014, 1.015, 1.0149, 1.014, 1.0127, 1.011, 1.0094, 1.0078, 1.0064, 1.0051, 1.0039, 1.0029, 1.0021, 1.0015, 1.001, 1.0006, 1.0003, 1); /* 655ms, picco 1.015 */
+  --md-motion-slow-spatial-dur: 655ms;
+  --md-motion-fast-effects: linear(0, 0.0266, 0.0894, 0.1714, 0.2838, 0.3731, 0.4576, 0.5351, 0.6045, 0.6658, 0.7191, 0.7755, 0.8132, 0.8451, 0.872, 0.8945, 0.9132, 0.9288, 0.9446, 0.9547, 0.9631, 0.9699, 0.9755, 0.9801, 0.9839, 0.9869, 0.99, 0.9919, 0.9935, 0.9947, 0.9957, 0.9966, 0.9972, 0.9979, 0.9983, 0.9986, 1); /* 149ms, picco 0.999 */
+  --md-motion-fast-effects-dur: 149ms;
+  --md-motion-default-effects: linear(0, 0.025, 0.0972, 0.178, 0.2802, 0.3673, 0.45, 0.5382, 0.6056, 0.6744, 0.7253, 0.7693, 0.8127, 0.844, 0.8704, 0.896, 0.914, 0.9314, 0.9436, 0.9537, 0.9633, 0.9699, 0.9763, 0.9806, 0.9842, 0.9876, 0.9899, 0.9921, 0.9936, 0.9948, 0.9959, 0.9967, 0.9973, 0.9979, 0.9983, 0.9987, 1); /* 230ms, picco 0.999 */
+  --md-motion-default-effects-dur: 230ms;
+  --md-motion-slow-effects: linear(0, 0.0277, 0.0936, 0.179, 0.2718, 0.3644, 0.4521, 0.5325, 0.6044, 0.6741, 0.7279, 0.774, 0.8131, 0.846, 0.8736, 0.8965, 0.9155, 0.9312, 0.9441, 0.9547, 0.9633, 0.9703, 0.9761, 0.9807, 0.9845, 0.9875, 0.99, 0.9922, 0.9937, 0.995, 0.996, 0.9968, 0.9974, 0.998, 0.9984, 0.9987, 1); /* 326ms, picco 0.999 */
+  --md-motion-slow-effects-dur: 326ms;
+
+  /* Opacità degli state layer */
+  --state-hover: .08;  --state-focus: .10;  --state-press: .10;
+
+  /* Tipografia (Google Sans Flex se presente sul sistema, poi Roboto) */
+  --font-brand: "Google Sans Flex", "Google Sans", "Product Sans", "Roboto Flex", Roboto, system-ui, sans-serif;
+  --font-plain: "Google Sans Text", "Google Sans Flex", Roboto, system-ui, sans-serif;
+  --font-mono: "Google Sans Code", "Roboto Mono", ui-monospace, monospace;
+
+  --inset-top: var(--window-inset-top, env(safe-area-inset-top, 0px));
+  --inset-bottom: var(--window-inset-bottom, env(safe-area-inset-bottom, 0px));
+  --navbar-h: 64px;
+}
+@media (prefers-color-scheme: dark) {
+  :root {
+    color-scheme: dark;
+    --md-primary: var(--primary, #a7d0b0);
+    --md-on-primary: var(--onPrimary, #22482f);
+    --md-primary-container: var(--primaryContainer, #355a41);
+    --md-on-primary-container: var(--onPrimaryContainer, #c3eecc);
+    --md-secondary: var(--secondary, #b6ccb9);
+    --md-on-secondary: var(--onSecondary, #314536);
+    --md-secondary-container: var(--secondaryContainer, #2d4032);
+    --md-on-secondary-container: var(--onSecondaryContainer, var(--on-secondaryContainer, #afc5b2));
+    --md-tertiary: var(--tertiary, #f3ffcc);
+    --md-on-tertiary: var(--onTertiary, #576434);
+    --md-tertiary-container: var(--tertiaryContainer, #e2f2b4);
+    --md-on-tertiary-container: var(--onTertiaryContainer, #4f5c2c);
+    --md-error: var(--error, #fa746f);
+    --md-on-error: var(--onError, #490006);
+    --md-error-container: var(--errorContainer, #871f21);
+    --md-on-error-container: var(--onErrorContainer, #ff9993);
+    --md-background: var(--background, #0b0f0c);
+    --md-on-background: var(--onBackground, #dfe8dd);
+    --md-surface: var(--surface, #0b0f0c);
+    --md-on-surface: var(--onSurface, #dfe8dd);
+    --md-surface-variant: var(--surfaceVariant, #202821);
+    --md-on-surface-variant: var(--onSurfaceVariant, #a4ada4);
+    --md-surface-container-lowest: var(--surfaceContainerLowest, #000000);
+    --md-surface-container-low: var(--surfaceContainerLow, #0f1510);
+    --md-surface-container: var(--surfaceContainer, #151b16);
+    --md-surface-container-high: var(--surfaceContainerHigh, #1a211c);
+    --md-surface-container-highest: var(--surfaceContainerHighest, #202821);
+    --md-surface-bright: var(--surfaceBright, #262e27);
+    --md-surface-dim: var(--surfaceDim, #0b0f0c);
+    --md-outline: var(--outline, #6f786f);
+    --md-outline-variant: var(--outlineVariant, #414a42);
+    --md-inverse-surface: var(--inverseSurface, #f7faf4);
+    --md-inverse-on-surface: var(--inverseOnSurface, #525652);
+    --md-inverse-primary: var(--inversePrimary, #41674d);
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  :root {
+    --md-motion-fast-spatial-dur: 0ms; --md-motion-default-spatial-dur: 0ms; --md-motion-slow-spatial-dur: 0ms;
+    --md-motion-default-effects: var(--md-motion-fast-effects); --md-motion-slow-effects: var(--md-motion-fast-effects);
+    --md-motion-default-effects-dur: var(--md-motion-fast-effects-dur); --md-motion-slow-effects-dur: var(--md-motion-fast-effects-dur);
+  }
+}
+
+/* ---------------------------------------------------------------- base --- */
+* { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+html, body { margin: 0; background: var(--md-surface); color: var(--md-on-surface); }
+body {
+  font: 400 16px/24px var(--font-plain); letter-spacing: .5px;
+  padding: 0 0 calc(var(--navbar-h) + var(--inset-bottom) + 24px);
+  -webkit-font-smoothing: antialiased; overscroll-behavior-y: none;
+}
+button, input, select { font: inherit; color: inherit; letter-spacing: inherit; }
+button { border: 0; background: none; cursor: pointer; padding: 0; }
+svg.i { width: 24px; height: 24px; fill: currentColor; flex: none; display: block; }
+.wrap { max-width: 600px; margin: 0 auto; padding: 0 16px; }
+.sr { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); }
+
+/* Scala tipografica (baseline + emphasized) */
+.display-l  { font: 400 57px/64px var(--font-brand); letter-spacing: -.25px; }
+.display-l.em { font-weight: 600; }
+.display-s  { font: 400 36px/44px var(--font-brand); letter-spacing: 0; }
+.headline-l { font: 400 32px/40px var(--font-brand); letter-spacing: 0; }
+.headline-l.em, .headline-s.em { font-weight: 600; }
+.headline-s { font: 400 24px/32px var(--font-brand); }
+.title-l    { font: 400 22px/28px var(--font-brand); letter-spacing: 0; }
+.title-l.em { font-weight: 600; }
+.title-m    { font: 500 16px/24px var(--font-brand); letter-spacing: .15px; }
+.title-m.em { font-weight: 700; }
+.title-s    { font: 500 14px/20px var(--font-brand); letter-spacing: .1px; }
+.body-l     { font: 400 16px/24px var(--font-plain); letter-spacing: .5px; }
+.body-m     { font: 400 14px/20px var(--font-plain); letter-spacing: .25px; }
+.body-s     { font: 400 12px/16px var(--font-plain); letter-spacing: .4px; }
+.label-l    { font: 500 14px/20px var(--font-brand); letter-spacing: .1px; }
+.label-m    { font: 500 12px/16px var(--font-brand); letter-spacing: .5px; }
+.label-s    { font: 500 11px/16px var(--font-brand); letter-spacing: .5px; }
+.num { font-variant-numeric: tabular-nums; }
+.variant { color: var(--md-on-surface-variant); }
+
+/* State layer: velo del colore del contenuto sopra il componente */
+.sl { position: relative; overflow: hidden; isolation: isolate; }
+.sl::before { content: ""; position: absolute; inset: 0; background: currentColor; opacity: 0; z-index: -1;
+  border-radius: inherit; transition: opacity var(--md-motion-fast-effects-dur) var(--md-motion-fast-effects); pointer-events: none; }
+@media (hover: hover) { .sl:hover::before { opacity: var(--state-hover); } }
+.sl:focus-visible::before { opacity: var(--state-focus); }
+.sl:active::before { opacity: var(--state-press); }
+.sl:focus-visible { outline: 2px solid var(--md-secondary); outline-offset: 2px; }
+
+/* --------------------------------------------------- app bar flessibile --- */
+.appbar { position: sticky; top: 0; z-index: 20; background: var(--md-surface);
+  padding-top: var(--inset-top); transition: background-color var(--md-motion-default-effects-dur) var(--md-motion-default-effects); }
+.appbar.scrolled { background: var(--md-surface-container); }
+.appbar .row { height: 64px; display: flex; align-items: center; gap: 4px; padding: 0 4px 0 16px; max-width: 600px; margin: 0 auto; }
+.appbar .small-title { flex: 1; opacity: 0; transform: translateY(8px);
+  transition: opacity var(--md-motion-fast-effects-dur) var(--md-motion-fast-effects), transform var(--md-motion-fast-spatial-dur) var(--md-motion-fast-spatial); }
+.appbar.scrolled .small-title { opacity: 1; transform: none; }
+.icon-btn { width: 48px; height: 48px; display: grid; place-items: center; border-radius: var(--shape-full); color: var(--md-on-surface-variant);
+  transition: border-radius var(--md-motion-fast-spatial-dur) var(--md-motion-fast-spatial); }
+.icon-btn:active { border-radius: var(--shape-md); }
+.large-title { padding: 8px 16px 20px; max-width: 600px; margin: 0 auto; }
+.large-title .sub { margin-top: 4px; display: flex; align-items: center; gap: 8px; }
+.daemon-dot { width: 8px; height: 8px; border-radius: 50%; background: var(--md-outline); }
+.daemon-dot.on { background: var(--md-primary); box-shadow: 0 0 0 4px color-mix(in srgb, var(--md-primary) 22%, transparent); }
+
+/* -------------------------------------------------------------- pagine --- */
+.page { display: none; }
+.page.active { display: block; animation: page-in var(--md-motion-default-spatial-dur) var(--md-motion-default-spatial) both; }
+@keyframes page-in { from { opacity: 0; transform: translateY(24px); } }
+.section-h { margin: 24px 16px 8px; color: var(--md-primary); }
+.card { background: var(--md-surface-container); border-radius: var(--shape-xl); padding: 20px; margin-bottom: 12px; }
+.banner { display: none; align-items: center; gap: 12px; border-radius: var(--shape-lg-inc); padding: 12px 16px; margin-bottom: 12px;
+  background: var(--md-error-container); color: var(--md-on-error-container); }
+.banner.show { display: flex; }
+.banner.info { background: var(--md-tertiary-container); color: var(--md-on-tertiary-container); }
+
+/* ------------------------------------------------------------------ hero --- */
+.hero { background: var(--md-surface-container); border-radius: var(--shape-xxl); padding: 24px 20px 20px; margin-bottom: 12px;
+  display: grid; justify-items: center; text-align: center; }
+.ring { position: relative; width: 208px; height: 208px; }
+.ring svg { width: 100%; height: 100%; overflow: visible; }
+.ring .pct { position: absolute; inset: 0; display: grid; place-content: center; }
+.ring .pct .display-l small { font-size: 28px; font-weight: 500; margin-left: 2px; color: var(--md-on-surface-variant); }
+.state-row { display: flex; align-items: center; gap: 14px; margin-top: 18px; text-align: left; width: 100%; max-width: 380px; }
+.shape-badge { width: 56px; height: 56px; position: relative; flex: none; display: grid; place-items: center; }
+.shape-badge svg.bg { position: absolute; inset: 0; width: 100%; height: 100%; overflow: visible;
+  transition: fill var(--md-motion-default-effects-dur) var(--md-motion-default-effects); }
+.shape-badge svg.i { position: relative; transition: color var(--md-motion-default-effects-dur) var(--md-motion-default-effects); }
+.window-chip { margin-top: 16px; display: inline-flex; align-items: center; gap: 8px; height: 32px; padding: 0 12px 0 8px;
+  border-radius: var(--shape-sm); background: var(--md-surface-container-high); color: var(--md-on-surface-variant); }
+.window-chip svg.i { width: 18px; height: 18px; }
+
+/* ----------------------------------------------------------- tile bento --- */
+.bento { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-bottom: 12px; }
+.tile { background: var(--md-surface-container); border-radius: var(--shape-lg-inc); padding: 16px; min-height: 120px;
+  display: flex; flex-direction: column; gap: 2px; }
+.tile .ic { width: 40px; height: 40px; border-radius: var(--shape-full); display: grid; place-items: center; margin-bottom: 10px;
+  background: var(--md-secondary-container); color: var(--md-on-secondary-container); }
+.tile .ic svg.i { width: 22px; height: 22px; }
+.tile:nth-child(1) { border-radius: var(--shape-xl) var(--shape-sm) var(--shape-sm) var(--shape-sm); }
+.tile:nth-child(2) { border-radius: var(--shape-sm) var(--shape-xl) var(--shape-sm) var(--shape-sm); }
+.tile:nth-child(3) { border-radius: var(--shape-sm) var(--shape-sm) var(--shape-sm) var(--shape-xl); }
+.tile:nth-child(4) { border-radius: var(--shape-sm) var(--shape-sm) var(--shape-xl) var(--shape-sm); }
+.tile.hot .ic { background: var(--md-error-container); color: var(--md-on-error-container); }
+
+/* ------------------------------------------- lista a segmenti (Android 16) */
+.seg-list { display: flex; flex-direction: column; gap: 2px; margin-bottom: 12px; }
+.seg-list > .item { background: var(--md-surface-container); border-radius: var(--shape-xs); min-height: 64px;
+  display: flex; align-items: center; gap: 16px; padding: 12px 16px;
+  transition: border-radius var(--md-motion-fast-spatial-dur) var(--md-motion-fast-spatial); }
+.seg-list > .item:first-child { border-top-left-radius: var(--shape-lg-inc); border-top-right-radius: var(--shape-lg-inc); }
+.seg-list > .item:last-child { border-bottom-left-radius: var(--shape-lg-inc); border-bottom-right-radius: var(--shape-lg-inc); }
+.seg-list > .item.tap:active { border-radius: var(--shape-lg-inc); }
+.seg-list > .item[hidden] { display: none; }
+.item .lead { width: 40px; height: 40px; border-radius: var(--shape-full); flex: none; display: grid; place-items: center;
+  background: var(--md-primary-container); color: var(--md-on-primary-container); }
+.item .txt { flex: 1; min-width: 0; }
+.item .txt .s { color: var(--md-on-surface-variant); }
+.item .trail { color: var(--md-on-surface); text-align: right; }
+.item.col { flex-direction: column; align-items: stretch; gap: 8px; }
+.item.col .top { display: flex; align-items: center; gap: 16px; }
+
+/* --------------------------------------------------------------- pulsanti -- */
+.btn { --h: 40px; --pad: 16px; --sq: var(--shape-md); --pr: var(--shape-sm);
+  height: var(--h); padding: 0 var(--pad); border-radius: var(--shape-full);
+  display: inline-flex; align-items: center; justify-content: center; gap: 8px; white-space: nowrap;
+  transition: border-radius var(--md-motion-fast-spatial-dur) var(--md-motion-fast-spatial),
+              background-color var(--md-motion-default-effects-dur) var(--md-motion-default-effects),
+              color var(--md-motion-default-effects-dur) var(--md-motion-default-effects); }
+.btn.m { --h: 56px; --pad: 24px; --sq: var(--shape-lg); --pr: var(--shape-md); font: 500 16px/24px var(--font-brand); }
+.btn.s { font: 500 14px/20px var(--font-brand); letter-spacing: .1px; }
+.btn.m svg.i { width: 24px; height: 24px; }
+.btn.s svg.i { width: 20px; height: 20px; }
+.btn.filled { background: var(--md-primary); color: var(--md-on-primary); }
+.btn.tonal { background: var(--md-secondary-container); color: var(--md-on-secondary-container); }
+.btn.outlined { box-shadow: inset 0 0 0 1px var(--md-outline-variant); color: var(--md-on-surface-variant); }
+.btn.text { color: var(--md-primary); padding: 0 12px; }
+.btn:active { border-radius: var(--pr); }
+.btn[aria-pressed="true"] { border-radius: var(--sq); background: var(--md-primary); color: var(--md-on-primary); }
+.btn[aria-pressed="true"]:active { border-radius: var(--pr); }
+.btn[disabled] { opacity: .38; pointer-events: none; }
+.btn-group { display: flex; gap: 8px; }
+.btn-group > .btn { flex: 1; }
+
+/* Gruppo di pulsanti connessi (sostituisce i pulsanti segmentati) */
+.connected { display: flex; gap: 2px; margin-bottom: 12px; }
+.connected .btn { flex: 1; border-radius: var(--shape-sm); background: var(--md-surface-container-high); color: var(--md-on-surface-variant); padding: 0 8px; }
+.connected .btn:first-child { border-top-left-radius: var(--shape-full); border-bottom-left-radius: var(--shape-full); }
+.connected .btn:last-child { border-top-right-radius: var(--shape-full); border-bottom-right-radius: var(--shape-full); }
+.connected .btn[aria-checked="true"] { border-radius: var(--shape-full); background: var(--md-secondary-container); color: var(--md-on-secondary-container); }
+.connected .btn .ck { width: 0; overflow: hidden; transition: width var(--md-motion-fast-spatial-dur) var(--md-motion-fast-spatial); }
+.connected .btn[aria-checked="true"] .ck { width: 18px; }
+.connected .btn .ck svg.i { width: 18px; height: 18px; }
+
+/* ------------------------------------------------------------ interruttore */
+.switch { position: relative; width: 52px; height: 32px; flex: none; }
+.switch input { position: absolute; inset: -8px; opacity: 0; margin: 0; cursor: pointer; z-index: 2; }
+.switch .track { position: absolute; inset: 0; border-radius: var(--shape-full); background: var(--md-surface-container-highest);
+  box-shadow: inset 0 0 0 2px var(--md-outline);
+  transition: background-color var(--md-motion-default-effects-dur) var(--md-motion-default-effects), box-shadow var(--md-motion-default-effects-dur) var(--md-motion-default-effects); }
+.switch .thumb { position: absolute; top: 50%; left: 16px; width: 16px; height: 16px; margin: -8px 0 0 -8px; border-radius: 50%;
+  background: var(--md-outline); display: grid; place-items: center;
+  transition: left var(--md-motion-fast-spatial-dur) var(--md-motion-fast-spatial), width var(--md-motion-fast-spatial-dur) var(--md-motion-fast-spatial),
+              height var(--md-motion-fast-spatial-dur) var(--md-motion-fast-spatial), margin var(--md-motion-fast-spatial-dur) var(--md-motion-fast-spatial),
+              background-color var(--md-motion-default-effects-dur) var(--md-motion-default-effects); }
+.switch .thumb svg.i { width: 16px; height: 16px; color: var(--md-on-primary-container); opacity: 0; transform: scale(.4);
+  transition: opacity var(--md-motion-fast-effects-dur) var(--md-motion-fast-effects), transform var(--md-motion-fast-spatial-dur) var(--md-motion-fast-spatial); }
+.switch input:checked ~ .track { background: var(--md-primary); box-shadow: none; }
+.switch input:checked ~ .thumb { left: 36px; width: 24px; height: 24px; margin: -12px 0 0 -12px; background: var(--md-on-primary); }
+.switch input:checked ~ .thumb svg.i { opacity: 1; transform: none; }
+.switch input:active ~ .thumb { width: 28px; height: 28px; margin: -14px 0 0 -14px; }
+.switch input:focus-visible ~ .track { outline: 2px solid var(--md-secondary); outline-offset: 2px; }
+
+/* --------------------------------------------------------- slider (XS) --- */
+.slider { position: relative; height: 44px; touch-action: none; --p: .5; }
+.slider input { position: absolute; inset: 0; width: 100%; height: 100%; opacity: 0; margin: 0; cursor: pointer; z-index: 2; }
+.slider .a, .slider .b { position: absolute; top: 14px; height: 16px; }
+.slider .a { left: 0; width: calc(var(--p) * (100% - 4px) - 6px); background: var(--md-primary);
+  border-radius: var(--shape-sm) 2px 2px var(--shape-sm); }
+.slider .b { right: 0; width: calc((1 - var(--p)) * (100% - 4px) - 6px); background: var(--md-secondary-container);
+  border-radius: 2px var(--shape-sm) var(--shape-sm) 2px; }
+.slider .stop { position: absolute; top: 20px; right: 6px; width: 4px; height: 4px; border-radius: 50%; background: var(--md-primary); }
+.slider .h { position: absolute; top: 0; left: calc(var(--p) * (100% - 4px)); width: 4px; height: 44px; border-radius: 2px; background: var(--md-primary);
+  transition: width var(--md-motion-fast-spatial-dur) var(--md-motion-fast-spatial), margin var(--md-motion-fast-spatial-dur) var(--md-motion-fast-spatial); }
+.slider.drag .h { width: 2px; margin-left: 1px; }
+.slider input:focus-visible ~ .h { outline: 2px solid var(--md-secondary); outline-offset: 3px; }
+.slider.zero .a { display: none; }
+.slider.zero .b { width: calc(100% - 10px); border-radius: 2px var(--shape-sm) var(--shape-sm) 2px; }
+.slider.full .b, .slider.full .stop { display: none; }
+.slider.full .a { width: calc(100% - 10px); }
+
+/* ----------------------------------------------------------------- grafici */
+.chart-card { background: var(--md-surface-container); border-radius: var(--shape-xl); padding: 16px 16px 12px; margin-bottom: 12px; }
+.chart-card .head { display: flex; justify-content: space-between; align-items: baseline; margin: 0 4px 8px; }
+.chart-box { position: relative; }
+.chart-box canvas { width: 100%; height: 196px; display: block; touch-action: pan-y; }
+.legend { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 10px; }
+.chip { display: inline-flex; align-items: center; gap: 8px; height: 32px; padding: 0 12px 0 10px; border-radius: var(--shape-sm);
+  box-shadow: inset 0 0 0 1px var(--md-outline-variant); color: var(--md-on-surface-variant); }
+.chip i { width: 12px; height: 12px; border-radius: 4px; display: inline-block; }
+.chip i.dash { height: 0; border-radius: 0; border-top: 2px dashed var(--md-outline); }
+.tip { position: absolute; top: -8px; pointer-events: none; background: var(--md-inverse-surface); color: var(--md-inverse-on-surface);
+  border-radius: var(--shape-sm); padding: 6px 10px; display: none; white-space: nowrap; z-index: 3; }
+.tip b { display: block; font: 600 14px/20px var(--font-brand); }
+.loading-over { position: absolute; inset: 0; display: none; place-items: center; }
+.loading .loading-over { display: grid; }
+.loading canvas { opacity: .35; }
+
+/* Indicatore di caricamento a forme che cambiano (contained) */
+.loader { width: 48px; height: 48px; border-radius: 50%; background: var(--md-primary-container); display: grid; place-items: center; }
+.loader svg { width: 38px; height: 38px; fill: var(--md-on-primary-container); }
+
+/* --------------------------------------------------------- statistiche --- */
+.stat-hero { background: var(--md-tertiary-container); color: var(--md-on-tertiary-container); border-radius: var(--shape-xxl) var(--shape-xxl) var(--shape-lg) var(--shape-lg);
+  padding: 20px 24px; margin-bottom: 2px; display: flex; align-items: center; gap: 16px; }
+.stat-hero .big { font: 600 45px/52px var(--font-brand); letter-spacing: 0; }
+.dist { display: flex; gap: 4px; height: 16px; margin: 4px 0 4px; }
+.dist div { border-radius: 4px; min-width: 4px; transition: flex-grow var(--md-motion-default-spatial-dur) var(--md-motion-default-spatial); }
+.dist div:first-child { border-radius: 8px 4px 4px 8px; }
+.dist div:last-child { border-radius: 4px 8px 8px 4px; }
+.dot { width: 10px; height: 10px; border-radius: 50%; flex: none; }
+
+/* ------------------------------------------------------------ impostazioni */
+.settings-group { margin-bottom: 8px; }
+.val { min-width: 64px; height: 32px; padding: 0 12px; border-radius: var(--shape-sm); display: inline-grid; place-items: center;
+  background: var(--md-secondary-container); color: var(--md-on-secondary-container); }
+.time-in { height: 40px; border-radius: var(--shape-md); border: 0; padding: 0 12px; background: var(--md-surface-container-highest);
+  color: var(--md-on-surface); font: 500 16px/24px var(--font-brand); }
+.item .err { color: var(--md-error); }
+
+/* Toolbar flottante (vibrant) per salvare */
+.toolbar { position: fixed; left: 50%; bottom: calc(var(--navbar-h) + var(--inset-bottom) + 16px); z-index: 30;
+  display: flex; align-items: center; gap: 4px; padding: 8px; border-radius: var(--shape-full);
+  background: var(--md-primary-container); color: var(--md-on-primary-container);
+  box-shadow: 0 3px 6px rgba(0,0,0,.18), 0 1px 2px rgba(0,0,0,.12);
+  transform: translate(-50%, 140%); opacity: 0; pointer-events: none;
+  transition: transform var(--md-motion-default-spatial-dur) var(--md-motion-default-spatial), opacity var(--md-motion-default-effects-dur) var(--md-motion-default-effects); }
+.toolbar.show { transform: translate(-50%, 0); opacity: 1; pointer-events: auto; }
+.toolbar .btn.text { color: var(--md-on-primary-container); }
+.toolbar .count { padding: 0 8px 0 12px; white-space: nowrap; }
+#p-settings { padding-bottom: 80px; }
+
+/* ----------------------------------------------------------------- log --- */
+.log-list { font: 400 13px/20px var(--font-mono); color: var(--md-on-surface-variant); }
+.log-list .l { display: grid; grid-template-columns: auto 1fr; gap: 10px; padding: 8px 0; border-bottom: 1px solid var(--md-outline-variant); }
+.log-list .l:last-child { border-bottom: 0; }
+.log-list .t { color: var(--md-primary); font-weight: 500; }
+pre.probe { font: 400 12px/18px var(--font-mono); white-space: pre-wrap; word-break: break-word; margin: 12px 0 0; color: var(--md-on-surface-variant); }
+
+/* ------------------------------------------- barra di navigazione (flex) -- */
+nav.navbar { position: fixed; left: 0; right: 0; bottom: 0; z-index: 25; background: var(--md-surface-container);
+  padding-bottom: var(--inset-bottom); }
+nav.navbar .in { height: var(--navbar-h); max-width: 600px; margin: 0 auto; display: flex; }
+nav.navbar button { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 4px;
+  color: var(--md-on-surface-variant); padding: 6px 0; min-width: 0; }
+nav.navbar .ind { width: 56px; height: 32px; border-radius: var(--shape-full); display: grid; place-items: center; position: relative; }
+nav.navbar .ind::after { content: ""; position: absolute; inset: 0; border-radius: inherit; background: var(--md-secondary-container);
+  transform: scaleX(.32); opacity: 0;
+  transition: transform var(--md-motion-fast-spatial-dur) var(--md-motion-fast-spatial), opacity var(--md-motion-fast-effects-dur) var(--md-motion-fast-effects); }
+nav.navbar .ind svg { position: relative; z-index: 1; }
+nav.navbar .ind .f { display: none; }
+nav.navbar button[aria-current="page"] { color: var(--md-secondary); }
+nav.navbar button[aria-current="page"] .ind { color: var(--md-on-secondary-container); }
+nav.navbar button[aria-current="page"] .ind::after { transform: none; opacity: 1; }
+nav.navbar button[aria-current="page"] .ind .o { display: none; }
+nav.navbar button[aria-current="page"] .ind .f { display: block; }
+nav.navbar .lbl { font: 500 12px/16px var(--font-brand); letter-spacing: .5px; white-space: nowrap; }
+
+/* --------------------------------------------------------------- snackbar */
+.snackbar { position: fixed; left: 16px; right: 16px; bottom: calc(var(--navbar-h) + var(--inset-bottom) + 12px); z-index: 40;
+  max-width: 568px; margin: 0 auto; min-height: 48px; display: flex; align-items: center; padding: 14px 16px; border-radius: var(--shape-xs);
+  background: var(--md-inverse-surface); color: var(--md-inverse-on-surface); box-shadow: 0 3px 6px rgba(0,0,0,.2);
+  transform: translateY(24px); opacity: 0; pointer-events: none;
+  transition: transform var(--md-motion-fast-spatial-dur) var(--md-motion-fast-spatial), opacity var(--md-motion-fast-effects-dur) var(--md-motion-fast-effects); }
+.snackbar.show { transform: none; opacity: 1; }
+</style>
+</head>
+<body>
+
+<header class="appbar" id="appbar">
+  <div class="row">
+    <span class="small-title title-l">Charge Limiter</span>
+    <button class="icon-btn sl" id="btnRefresh" aria-label="Aggiorna"><svg class="i" viewBox="0 -960 960 960"><path data-icon="refresh"/></svg></button>
+  </div>
+</header>
+<div class="large-title">
+  <div class="display-s" style="font-weight:600">Charge Limiter</div>
+  <div class="sub body-m variant"><span class="daemon-dot" id="daemonDot"></span><span id="subtitle">Caricamento…</span></div>
+</div>
+
+<main class="wrap">
+  <div class="banner info" id="demoBanner"><svg class="i" viewBox="0 -960 960 960"><path data-icon="info"/></svg>
+    <span class="body-m">Anteprima con dati di esempio. Apri la pagina da KernelSU, APatch, WebUI X o KsuWebUI per i dati reali.</span></div>
+  <div class="banner" id="warnBanner"><svg class="i" viewBox="0 -960 960 960"><path data-icon="warning"/></svg><span class="body-m" id="warnText"></span></div>
+
+  <!-- ================================================================ STATO -->
+  <section class="page active" id="p-status" aria-label="Stato">
+    <div class="hero">
+      <div class="ring" role="img" id="ringBox" aria-label="Livello batteria">
+        <svg viewBox="0 0 208 208" aria-hidden="true">
+          <path id="ringTrack" fill="none" stroke-linecap="round" stroke-width="12" style="stroke: var(--md-secondary-container)"/>
+          <path id="ringInd" fill="none" stroke-linecap="round" stroke-width="12" style="stroke: var(--md-primary)"/>
+          <circle id="mMin" r="3" style="fill: var(--md-on-secondary-container)"/>
+          <circle id="mMax" r="3" style="fill: var(--md-on-secondary-container)"/>
+        </svg>
+        <div class="pct"><span class="display-l em num" id="pct">--</span><span class="label-l variant" id="pctSub">batteria</span></div>
+      </div>
+      <div class="state-row">
+        <div class="shape-badge" aria-hidden="true">
+          <svg class="bg" viewBox="-30 -30 60 60" id="badgeSvg"><path id="badgePath"/></svg>
+          <svg class="i" viewBox="0 -960 960 960" id="badgeIcon"><path/></svg>
+        </div>
+        <div>
+          <div class="title-l em" id="stTxt">Caricamento…</div>
+          <div class="body-m variant" id="stSub"></div>
+        </div>
+      </div>
+      <div class="window-chip label-l" id="windowChip"><svg class="i" viewBox="0 -960 960 960"><path data-icon="battery_full"/></svg><span id="windowTxt"></span></div>
+    </div>
+
+    <div class="bento">
+      <div class="tile" id="tileTemp"><div class="ic"><svg class="i" viewBox="0 -960 960 960"><path data-icon="device_thermostat"/></svg></div>
+        <span class="label-l variant">Temperatura</span><span class="title-l em num" id="tTemp">--</span><span class="body-s variant" id="tTempS"></span></div>
+      <div class="tile"><div class="ic"><svg class="i" viewBox="0 -960 960 960"><path data-icon="electric_bolt"/></svg></div>
+        <span class="label-l variant">Corrente</span><span class="title-l em num" id="tCurr">--</span><span class="body-s variant" id="tCurrS"></span></div>
+      <div class="tile"><div class="ic"><svg class="i" viewBox="0 -960 960 960"><path data-icon="speed"/></svg></div>
+        <span class="label-l variant">Limite di carica</span><span class="title-l em num" id="tLim">--</span><span class="body-s variant" id="tLimS"></span></div>
+      <div class="tile"><div class="ic"><svg class="i" viewBox="0 -960 960 960"><path data-icon="bolt"/></svg></div>
+        <span class="label-l variant">Tensione</span><span class="title-l em num" id="tVolt">--</span><span class="body-s variant" id="tVoltS"></span></div>
+    </div>
+
+    <h2 class="section-h title-s">Azioni rapide</h2>
+    <div class="card" style="padding:16px">
+      <div class="btn-group" style="margin-bottom:8px">
+        <button class="btn m tonal sl" id="aFull" aria-pressed="false"><svg class="i" viewBox="0 -960 960 960"><path data-icon="battery_charging_full"/></svg><span>100% ora</span></button>
+        <button class="btn m tonal sl" id="aPause" aria-pressed="false"><svg class="i" viewBox="0 -960 960 960"><path data-icon="pause"/></svg><span>Pausa</span></button>
+      </div>
+      <div class="btn-group">
+        <button class="btn s outlined sl" id="aRestart"><svg class="i" viewBox="0 -960 960 960"><path data-icon="restart_alt"/></svg>Riavvia demone</button>
+        <button class="btn s outlined sl" id="aExport"><svg class="i" viewBox="0 -960 960 960"><path data-icon="download"/></svg>Esporta CSV</button>
+      </div>
+    </div>
+    <div class="seg-list" id="smartBox" hidden>
+      <div class="item"><span class="lead" style="background:var(--md-tertiary-container);color:var(--md-on-tertiary-container)"><svg class="i" viewBox="0 -960 960 960"><path data-icon="alarm"/></svg></span>
+        <div class="txt"><div class="title-m">Carica smart</div><div class="body-m s" id="smartTxt"></div></div></div>
+    </div>
+
+    <h2 class="section-h title-s">Salute batteria</h2>
+    <div class="seg-list">
+      <div class="item"><span class="lead"><svg class="i" viewBox="0 -960 960 960"><path data-icon="ecg_heart"/></svg></span>
+        <div class="txt"><div class="title-m">Salute (SOH)</div><div class="body-m s">Stimata dal fuel gauge</div></div><span class="trail title-l em num" id="hSoh">--</span></div>
+      <div class="item"><span class="lead"><svg class="i" viewBox="0 -960 960 960"><path data-icon="battery_full"/></svg></span>
+        <div class="txt"><div class="title-m">Capacità reale</div><div class="body-m s" id="hCapS">--</div></div><span class="trail title-l em num" id="hCap">--</span></div>
+      <div class="item"><span class="lead"><svg class="i" viewBox="0 -960 960 960"><path data-icon="cycle"/></svg></span>
+        <div class="txt"><div class="title-m">Cicli equivalenti</div><div class="body-m s" id="hEqS">--</div></div><span class="trail title-l em num" id="hEq">--</span></div>
+      <div class="item"><span class="lead"><svg class="i" viewBox="0 -960 960 960"><path data-icon="history"/></svg></span>
+        <div class="txt"><div class="title-m">Cicli del kernel</div><div class="body-m s">Contatore del fuel gauge</div></div><span class="trail title-l em num" id="hCyc">--</span></div>
+    </div>
+  </section>
+
+  <!-- ============================================================== GRAFICI -->
+  <section class="page" id="p-charts" aria-label="Grafici">
+    <div class="connected" role="radiogroup" aria-label="Periodo" id="rangeSeg"></div>
+    <div class="chart-card">
+      <div class="head"><span class="title-m">Livello batteria</span><span class="body-m variant num" id="cCapNow"></span></div>
+      <div class="chart-box"><canvas id="cCap" aria-label="Livello batteria nel tempo"></canvas><div class="tip"></div><div class="loading-over"><div class="loader"><svg viewBox="-30 -30 60 60"><path/></svg></div></div></div>
+      <div class="legend label-l">
+        <span class="chip"><i style="background:var(--band-charge);box-shadow:inset 0 0 0 1.5px var(--md-primary)"></i>In carica</span>
+        <span class="chip"><i style="background:var(--band-hold);box-shadow:inset 0 0 0 1.5px var(--md-outline)"></i>Sospesa</span>
+        <span class="chip"><i style="background:var(--band-thermal);box-shadow:inset 0 0 0 1.5px var(--md-error)"></i>Pausa termica</span>
+        <span class="chip"><i class="dash"></i>Soglie</span>
+      </div>
+    </div>
+    <div class="chart-card">
+      <div class="head"><span class="title-m">Temperatura</span><span class="body-m variant num" id="cTempNow"></span></div>
+      <div class="chart-box"><canvas id="cTemp" aria-label="Temperatura nel tempo"></canvas><div class="tip"></div><div class="loading-over"><div class="loader"><svg viewBox="-30 -30 60 60"><path/></svg></div></div></div>
+      <div class="legend label-l"><span class="chip"><i class="dash"></i>Corrente ridotta · Stop carica</span></div>
+    </div>
+    <div class="chart-card">
+      <div class="head"><span class="title-m">Corrente</span><span class="body-m variant num" id="cCurrNow"></span></div>
+      <div class="chart-box"><canvas id="cCurr" aria-label="Corrente nel tempo"></canvas><div class="tip"></div><div class="loading-over"><div class="loader"><svg viewBox="-30 -30 60 60"><path/></svg></div></div></div>
+      <div class="body-s variant" style="margin:10px 4px 0">Valore assoluto in mA: se entra o esce lo dicono le fasce del grafico del livello.</div>
+    </div>
+  </section>
+
+  <!-- ========================================================= STATISTICHE -->
+  <section class="page" id="p-stats" aria-label="Statistiche">
+    <div class="connected" role="radiogroup" aria-label="Periodo" id="rangeSeg2"></div>
+    <div class="stat-hero">
+      <svg class="i" viewBox="0 -960 960 960" style="width:40px;height:40px"><path data-icon="hourglass_top"/></svg>
+      <div><div class="label-l">Autonomia stimata, da 100% a 0%</div><div class="big num" id="sAuto">--</div></div>
+    </div>
+    <div class="seg-list" id="sDrain"></div>
+    <div class="body-s variant" style="margin:-4px 8px 16px">Calcolato solo a cavo scollegato. In sonno profondo i campioni si diradano: sono stime.</div>
+
+    <h2 class="section-h title-s">Come passa il tempo</h2>
+    <div class="card" style="padding:16px 16px 8px"><div class="dist" id="sBar"></div><div id="sTime"></div></div>
+
+    <h2 class="section-h title-s">Ricarica</h2>
+    <div class="seg-list" id="sCharge"></div>
+
+    <h2 class="section-h title-s">Storico salute</h2>
+    <div class="seg-list" id="sHealth"></div>
+  </section>
+
+  <!-- ======================================================== IMPOSTAZIONI -->
+  <section class="page" id="p-settings" aria-label="Impostazioni">
+    <div id="form"></div>
+  </section>
+
+  <!-- ================================================================= LOG -->
+  <section class="page" id="p-log" aria-label="Log">
+    <div class="card">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:4px">
+        <span class="title-m">Eventi recenti</span>
+        <button class="btn s tonal sl" id="lRefresh"><svg class="i" viewBox="0 -960 960 960"><path data-icon="refresh"/></svg>Aggiorna</button>
+      </div>
+      <div class="log-list" id="logBox"></div>
+    </div>
+    <div class="card">
+      <div style="display:flex;justify-content:space-between;align-items:center;gap:12px">
+        <div><div class="title-m">Nodi del kernel</div><div class="body-m variant">Quali controlli di ricarica offre il tuo kernel</div></div>
+        <button class="btn s tonal sl" id="pProbe"><svg class="i" viewBox="0 -960 960 960"><path data-icon="search_activity"/></svg>Analizza</button>
+      </div>
+      <pre class="probe" id="probeBox"></pre>
+    </div>
+  </section>
+</main>
+
+<div class="toolbar" id="toolbar" role="toolbar" aria-label="Modifiche non salvate">
+  <span class="count label-l" id="dirtyCount"></span>
+  <button class="btn s text sl" id="fReset">Annulla</button>
+  <button class="btn s filled sl" id="fSave"><svg class="i" viewBox="0 -960 960 960"><path data-icon="check"/></svg>Salva</button>
+</div>
+
+<nav class="navbar" aria-label="Sezioni"><div class="in" id="navIn"></div></nav>
+<div class="snackbar body-m" id="snack" role="status" aria-live="polite"></div>
+
+<script src="mcu.min.js"></script>
+<script>
+"use strict";
+const ICONS = {"battery_charging_full":"M660-200h-53q-9.39 0-13.7-7.5-4.3-7.5.7-15.5l92-147q3-5 8.5-3.5t5.5 7.5v86h53q9.39 0 13.7 7.5 4.3 7.5-.7 15.5l-92 148q-3 5-8.5 3.5T660-113v-87Zm-320 60Zm-30 60q-12.75 0-21.37-8.63Q280-97.25 280-110v-676q0-12.75 8.63-21.38Q297.25-816 310-816h90v-34q0-12.75 8.63-21.38Q417.25-880 430-880h100q12.75 0 21.38 8.62Q560-862.75 560-850v34h90q12.75 0 21.38 8.62Q680-798.75 680-786v298q0 12.75-8.68 21.37-8.67 8.63-21.5 8.63-12.82 0-21.32-8.63-8.5-8.62-8.5-21.37v-268H340v616h169q12.75 0 21.38 8.68 8.62 8.67 8.62 21.5 0 12.82-8.62 21.32Q521.75-80 509-80H310Z","battery_full":"M310-80q-12.75 0-21.37-8.63Q280-97.25 280-110v-676q0-12.75 8.63-21.38Q297.25-816 310-816h90v-34q0-12.75 8.63-21.38Q417.25-880 430-880h100q12.75 0 21.38 8.62Q560-862.75 560-850v34h90q12.75 0 21.38 8.62Q680-798.75 680-786v676q0 12.75-8.62 21.37Q662.75-80 650-80H310Z","bolt":"m393-165 279-335H492l36-286-253 366h154l-36 255Zm-33-195H217q-18 0-26.5-16t2.5-31l338-488q8-11 20-15t24 1q12 5 19 16t5 24l-39 309h176q19 0 27 17t-4 32L388-66q-8 10-20.5 13T344-55q-11-5-17.5-16T322-95l38-265Zm113-115Z","device_thermostat":"M338.5-138.5Q280-197 280-280q0-51 23-96t68-67v-328q0-45.42 32-77.21Q435-880 480-880t77 31.79q32 31.79 32 77.21v328q45 22 68 67t23 96q0 83-58.5 141.5T480-80q-83 0-141.5-58.5ZM431-515h98v-53h-49v-39h49v-87h-49v-38.5h49V-771q0-20.83-14.12-34.91-14.13-14.09-35-14.09Q459-820 445-805.91q-14 14.08-14 34.91v256Z","power":"M442-180h76v-82l142-156v-191H300v191l142 155.7v82.3Zm-60 30v-88L256-377q-7.65-7.86-11.83-18.21Q240-405.57 240-417v-192q0-24.75 17.63-42.38Q275.25-669 300-669h72l-30 30v-171q0-12.75 8.68-21.38 8.67-8.62 21.5-8.62 12.82 0 21.32 8.62 8.5 8.63 8.5 21.38v141h156v-141q0-12.75 8.68-21.38 8.67-8.62 21.5-8.62 12.82 0 21.32 8.62 8.5 8.63 8.5 21.38v171l-30-30h72q24.75 0 42.38 17.62Q720-633.75 720-609v192q0 11.43-4.17 21.79Q711.65-384.86 704-377L578-238v88q0 12.75-8.62 21.37Q560.75-120 548-120H412q-12.75 0-21.37-8.63Q382-137.25 382-150Zm98-245Z","power_off":"M412-120q-12.75 0-21.37-8.63Q382-137.25 382-150v-88L256-377q-7.65-7.86-11.83-18.21Q240-405.57 240-417v-192.32q0-24.68 17-42.18t41-17.5l60 60h-58v191l142 155.7v82.3h76v-82l49-54L88-795q-9-9-9-21t9-21q9-9 21-9t21 9l708 708q9 9 9 21t-9 21q-9 9-21 9t-21-9L610-273l-32 35v88q0 12.75-8.62 21.37Q560.75-120 548-120H412Zm280-240-32-32v-217H443L342-710v-100q0-12.75 8.68-21.38 8.67-8.62 21.5-8.62 12.82 0 21.32 8.62 8.5 8.63 8.5 21.38v141h156v-141q0-12.75 8.68-21.38 8.67-8.62 21.5-8.62 12.82 0 21.32 8.62 8.5 8.63 8.5 21.38v171l-30-30h72q24.75 0 42.38 17.62Q720-633.75 720-609v194q0 11.38-3.5 21.69T705-375l-13 15ZM553-499Zm-114 55Z","alarm":"M512-450v-160q0-13-8.5-21.5T482-640q-13 0-21.5 8.5T452-610v172q0 6 2 11t7 10l118 118q9 9 21 9t21-9q9-9 9-21t-9-21L512-450ZM339.5-110q-65.5-28-114-76.5t-77-114Q120-366 120-441q0-74 28.5-139.5t77-114.5q48.5-49 114-77T479-800q74 0 139.5 28T733-695q49 49 77 114.5T838-441q0 75-28 140.5t-77 114Q684-138 618.5-110T479-82q-74 0-139.5-28ZM479-439ZM71-688q-9-9-8.5-21t9.5-21l121-117q9-8 21.5-7.5T235-846q9 9 8.5 21t-9.5 21L113-687q-9 8-21.5 7.5T71-688Zm816 0q-8 8-20.5 8.5T845-687L724-804q-9-8-9.5-20.5T723-846q8-8 20.5-8.5T765-847l121 117q9 8 9.5 20.5T887-688ZM479-142q125 0 212-87t87-212q0-125-87-212t-212-87q-125 0-212 87t-87 212q0 125 87 212t212 87Z","monitoring":"M128.5-128.63Q120-137.25 120-150v-46q0-12.75 8.68-21.38 8.67-8.62 21.5-8.62 12.82 0 21.32 8.62 8.5 8.63 8.5 21.38v46q0 12.75-8.68 21.37-8.67 8.63-21.5 8.63-12.82 0-21.32-8.63Zm165 0Q285-137.25 285-150v-206q0-12.75 8.68-21.38 8.67-8.62 21.5-8.62 12.82 0 21.32 8.62 8.5 8.63 8.5 21.38v206q0 12.75-8.68 21.37-8.67 8.63-21.5 8.63-12.82 0-21.32-8.63Zm165 0Q450-137.25 450-150v-146q0-12.75 8.68-21.38 8.67-8.62 21.5-8.62 12.82 0 21.32 8.62 8.5 8.63 8.5 21.38v146q0 12.75-8.68 21.37-8.67 8.63-21.5 8.63-12.82 0-21.32-8.63Zm165 0Q615-137.25 615-150v-246q0-12.75 8.68-21.38 8.67-8.62 21.5-8.62 12.82 0 21.32 8.62 8.5 8.63 8.5 21.38v246q0 12.75-8.68 21.37-8.67 8.63-21.5 8.63-12.82 0-21.32-8.63Zm165 0Q780-137.25 780-150v-366q0-12.75 8.68-21.38 8.67-8.62 21.5-8.62 12.82 0 21.32 8.62 8.5 8.63 8.5 21.38v366q0 12.75-8.68 21.37-8.67 8.63-21.5 8.63-12.82 0-21.32-8.63ZM559.5-499q-11.5 0-22.46-4.7-10.97-4.69-20.04-13.3L400-634 172-407q-9.07 9-21.53 8.5-12.47-.5-21.34-9.5-8.13-9-8.63-21t8.5-21l229-227q9.07-8.87 20.04-12.93Q389-694 400-694t22.34 4.07Q433.68-685.87 442-677l118 118 229-229q9-9 21-9t20.87 9q8.13 9 8.63 21t-8.5 21L602-517q-8 9-19.5 13.5t-23 4.5Z","monitoring_fill":"M128.5-128.63Q120-137.25 120-150v-46q0-12.75 8.68-21.38 8.67-8.62 21.5-8.62 12.82 0 21.32 8.62 8.5 8.63 8.5 21.38v46q0 12.75-8.68 21.37-8.67 8.63-21.5 8.63-12.82 0-21.32-8.63Zm165 0Q285-137.25 285-150v-206q0-12.75 8.68-21.38 8.67-8.62 21.5-8.62 12.82 0 21.32 8.62 8.5 8.63 8.5 21.38v206q0 12.75-8.68 21.37-8.67 8.63-21.5 8.63-12.82 0-21.32-8.63Zm165 0Q450-137.25 450-150v-146q0-12.75 8.68-21.38 8.67-8.62 21.5-8.62 12.82 0 21.32 8.62 8.5 8.63 8.5 21.38v146q0 12.75-8.68 21.37-8.67 8.63-21.5 8.63-12.82 0-21.32-8.63Zm165 0Q615-137.25 615-150v-246q0-12.75 8.68-21.38 8.67-8.62 21.5-8.62 12.82 0 21.32 8.62 8.5 8.63 8.5 21.38v246q0 12.75-8.68 21.37-8.67 8.63-21.5 8.63-12.82 0-21.32-8.63Zm165 0Q780-137.25 780-150v-366q0-12.75 8.68-21.38 8.67-8.62 21.5-8.62 12.82 0 21.32 8.62 8.5 8.63 8.5 21.38v366q0 12.75-8.68 21.37-8.67 8.63-21.5 8.63-12.82 0-21.32-8.63ZM559.5-499q-11.5 0-22.46-4.7-10.97-4.69-20.04-13.3L400-634 172-407q-9.07 9-21.53 8.5-12.47-.5-21.34-9.5-8.13-9-8.63-21t8.5-21l229-227q9.07-8.87 20.04-12.93Q389-694 400-694t22.34 4.07Q433.68-685.87 442-677l118 118 229-229q9-9 21-9t20.87 9q8.13 9 8.63 21t-8.5 21L602-517q-8 9-19.5 13.5t-23 4.5Z","bar_chart":"M690-160q-12.75 0-21.37-8.63Q660-177.25 660-190v-220q0-12.75 8.63-21.38Q677.25-440 690-440h80q12.75 0 21.38 8.62Q800-422.75 800-410v220q0 12.75-8.62 21.37Q782.75-160 770-160h-80Zm-250 0q-12.75 0-21.37-8.63Q410-177.25 410-190v-580q0-12.75 8.63-21.38Q427.25-800 440-800h80q12.75 0 21.38 8.62Q550-782.75 550-770v580q0 12.75-8.62 21.37Q532.75-160 520-160h-80Zm-250 0q-12.75 0-21.37-8.63Q160-177.25 160-190v-380q0-12.75 8.63-21.38Q177.25-600 190-600h80q12.75 0 21.38 8.62Q300-582.75 300-570v380q0 12.75-8.62 21.37Q282.75-160 270-160h-80Z","bar_chart_fill":"M690-160q-12.75 0-21.37-8.63Q660-177.25 660-190v-220q0-12.75 8.63-21.38Q677.25-440 690-440h80q12.75 0 21.38 8.62Q800-422.75 800-410v220q0 12.75-8.62 21.37Q782.75-160 770-160h-80Zm-250 0q-12.75 0-21.37-8.63Q410-177.25 410-190v-580q0-12.75 8.63-21.38Q427.25-800 440-800h80q12.75 0 21.38 8.62Q550-782.75 550-770v580q0 12.75-8.62 21.37Q532.75-160 520-160h-80Zm-250 0q-12.75 0-21.37-8.63Q160-177.25 160-190v-380q0-12.75 8.63-21.38Q177.25-600 190-600h80q12.75 0 21.38 8.62Q300-582.75 300-570v380q0 12.75-8.62 21.37Q282.75-160 270-160h-80Z","tune":"M435.5-128.63Q427-137.25 427-150v-165q0-12.75 8.68-21.38 8.67-8.62 21.5-8.62 12.82 0 21.32 8.62 8.5 8.63 8.5 21.38v53h323q12.75 0 21.38 8.68 8.62 8.67 8.62 21.5 0 12.82-8.62 21.32-8.63 8.5-21.38 8.5H487v52q0 12.75-8.68 21.37-8.67 8.63-21.5 8.63-12.82 0-21.32-8.63ZM150-202q-12.75 0-21.37-8.68-8.63-8.67-8.63-21.5 0-12.82 8.63-21.32 8.62-8.5 21.37-8.5h187q12.75 0 21.38 8.68 8.62 8.67 8.62 21.5 0 12.82-8.62 21.32-8.63 8.5-21.38 8.5H150Zm165.5-174.63Q307-385.25 307-398v-52H150q-12.75 0-21.37-8.68-8.63-8.67-8.63-21.5 0-12.82 8.63-21.32 8.62-8.5 21.37-8.5h157v-54q0-12.75 8.68-21.38 8.67-8.62 21.5-8.62 12.82 0 21.32 8.62 8.5 8.63 8.5 21.38v166q0 12.75-8.68 21.37-8.67 8.63-21.5 8.63-12.82 0-21.32-8.63ZM457-450q-12.75 0-21.37-8.68-8.63-8.67-8.63-21.5 0-12.82 8.63-21.32 8.62-8.5 21.37-8.5h353q12.75 0 21.38 8.68 8.62 8.67 8.62 21.5 0 12.82-8.62 21.32-8.63 8.5-21.38 8.5H457Zm144.5-173.63Q593-632.25 593-645v-165q0-12.75 8.68-21.38 8.67-8.62 21.5-8.62 12.82 0 21.32 8.62 8.5 8.63 8.5 21.38v52h157q12.75 0 21.38 8.68 8.62 8.67 8.62 21.5 0 12.82-8.62 21.32-8.63 8.5-21.38 8.5H653v53q0 12.75-8.68 21.37-8.67 8.63-21.5 8.63-12.82 0-21.32-8.63ZM150-698q-12.75 0-21.37-8.68-8.63-8.67-8.63-21.5 0-12.82 8.63-21.32 8.62-8.5 21.37-8.5h353q12.75 0 21.38 8.68 8.62 8.67 8.62 21.5 0 12.82-8.62 21.32-8.63 8.5-21.38 8.5H150Z","tune_fill":"M435.5-128.63Q427-137.25 427-150v-165q0-12.75 8.68-21.38 8.67-8.62 21.5-8.62 12.82 0 21.32 8.62 8.5 8.63 8.5 21.38v53h323q12.75 0 21.38 8.68 8.62 8.67 8.62 21.5 0 12.82-8.62 21.32-8.63 8.5-21.38 8.5H487v52q0 12.75-8.68 21.37-8.67 8.63-21.5 8.63-12.82 0-21.32-8.63ZM150-202q-12.75 0-21.37-8.68-8.63-8.67-8.63-21.5 0-12.82 8.63-21.32 8.62-8.5 21.37-8.5h187q12.75 0 21.38 8.68 8.62 8.67 8.62 21.5 0 12.82-8.62 21.32-8.63 8.5-21.38 8.5H150Zm165.5-174.63Q307-385.25 307-398v-52H150q-12.75 0-21.37-8.68-8.63-8.67-8.63-21.5 0-12.82 8.63-21.32 8.62-8.5 21.37-8.5h157v-54q0-12.75 8.68-21.38 8.67-8.62 21.5-8.62 12.82 0 21.32 8.62 8.5 8.63 8.5 21.38v166q0 12.75-8.68 21.37-8.67 8.63-21.5 8.63-12.82 0-21.32-8.63ZM457-450q-12.75 0-21.37-8.68-8.63-8.67-8.63-21.5 0-12.82 8.63-21.32 8.62-8.5 21.37-8.5h353q12.75 0 21.38 8.68 8.62 8.67 8.62 21.5 0 12.82-8.62 21.32-8.63 8.5-21.38 8.5H457Zm144.5-173.63Q593-632.25 593-645v-165q0-12.75 8.68-21.38 8.67-8.62 21.5-8.62 12.82 0 21.32 8.62 8.5 8.63 8.5 21.38v52h157q12.75 0 21.38 8.68 8.62 8.67 8.62 21.5 0 12.82-8.62 21.32-8.63 8.5-21.38 8.5H653v53q0 12.75-8.68 21.37-8.67 8.63-21.5 8.63-12.82 0-21.32-8.63ZM150-698q-12.75 0-21.37-8.68-8.63-8.67-8.63-21.5 0-12.82 8.63-21.32 8.62-8.5 21.37-8.5h353q12.75 0 21.38 8.68 8.62 8.67 8.62 21.5 0 12.82-8.62 21.32-8.63 8.5-21.38 8.5H150Z","receipt_long":"M222-80q-43.75 0-74.37-30.63Q117-141.25 117-185v-95q0-12.75 8.63-21.38Q134.25-310 147-310h97v-552q0-5.25 4.5-7.13Q253-871 257-867l36 36q4.64 5 10.82 5 6.18 0 11.18-5l38-38q4.64-5 10.82-5 6.18 0 11.18 5l37 38q4.64 5 10.82 5 6.18 0 11.18-5l38-38q4.64-5 10.82-5 6.18 0 11.18 5l38 38q4.64 5 10.82 5 6.18 0 11.18-5l38-38q4.64-5 10.82-5 6.18 0 11.18 5l38 38q4.64 5 10.82 5 6.18 0 11.18-5l38-38q4.64-5 10.82-5 6.18 0 11.18 5l38 38q4.64 5 10.82 5 6.18 0 11.18-5l36-36q4-4 8.5-2.13 4.5 1.88 4.5 7.13v677q0 43.75-30.62 74.37Q781.75-80 738-80H222Zm516-60q20 0 32.5-12.5T783-185v-595H304v470h359q12.75 0 21.38 8.62Q693-292.75 693-280v94.85q0 20.15 12.5 32.65T738-140ZM387-682h180q12.75 0 21.38 8.68 8.62 8.67 8.62 21.5 0 12.82-8.62 21.32-8.63 8.5-21.38 8.5H387q-12.75 0-21.37-8.68-8.63-8.67-8.63-21.5 0-12.82 8.63-21.32 8.62-8.5 21.37-8.5Zm0 134h180q12.75 0 21.38 8.68 8.62 8.67 8.62 21.5 0 12.82-8.62 21.32-8.63 8.5-21.38 8.5H387q-12.75 0-21.37-8.68-8.63-8.67-8.63-21.5 0-12.82 8.63-21.32 8.62-8.5 21.37-8.5Zm303-74q-12 0-21-9t-9-21q0-12 9-21t21-9q12 0 21 9t9 21q0 12-9 21t-21 9Zm0 129q-12 0-21-9t-9-21q0-12 9-21t21-9q12 0 21 9t9 21q0 12-9 21t-21 9ZM221-140h412v-110H177v65q0 20 12.65 32.5T221-140Zm-44 0v-110 110Z","receipt_long_fill":"M222-80q-43.75 0-74.37-30.63Q117-141.25 117-185v-95q0-12.75 8.63-21.38Q134.25-310 147-310h97v-552q0-5.25 4.5-7.13Q253-871 257-867l36 36q4.64 5 10.82 5 6.18 0 11.18-5l38-38q4.64-5 10.82-5 6.18 0 11.18 5l37 38q4.64 5 10.82 5 6.18 0 11.18-5l38-38q4.64-5 10.82-5 6.18 0 11.18 5l38 38q4.64 5 10.82 5 6.18 0 11.18-5l38-38q4.64-5 10.82-5 6.18 0 11.18 5l38 38q4.64 5 10.82 5 6.18 0 11.18-5l38-38q4.64-5 10.82-5 6.18 0 11.18 5l38 38q4.64 5 10.82 5 6.18 0 11.18-5l36-36q4-4 8.5-2.13 4.5 1.88 4.5 7.13v677q0 43.75-30.62 74.37Q781.75-80 738-80H222Zm514.5-60q19.5 0 31.5-12.5t12-32.5v-611H307v536h360q12.75 0 21.38 8.62Q697-242.75 697-230v45q0 20 10 32.5t29.5 12.5ZM390-702h180q12.75 0 21.38 8.68 8.62 8.67 8.62 21.5 0 12.82-8.62 21.32-8.63 8.5-21.38 8.5H390q-12.75 0-21.37-8.68-8.63-8.67-8.63-21.5 0-12.82 8.63-21.32 8.62-8.5 21.37-8.5Zm0 134h180q12.75 0 21.38 8.68 8.62 8.67 8.62 21.5 0 12.82-8.62 21.32-8.63 8.5-21.38 8.5H390q-12.75 0-21.37-8.68-8.63-8.67-8.63-21.5 0-12.82 8.63-21.32 8.62-8.5 21.37-8.5Zm303-74q-12 0-21-9t-9-21q0-12 9-21t21-9q12 0 21 9t9 21q0 12-9 21t-21 9Zm0 129q-12 0-21-9t-9-21q0-12 9-21t21-9q12 0 21 9t9 21q0 12-9 21t-21 9Z","battery_android_frame_bolt":"M130-240q-37.5 0-63.75-26.25T40-330v-300q0-37.5 26.25-63.75T130-720h539q12.75 0 21.38 8.68 8.62 8.67 8.62 21.5 0 12.82-8.62 21.32-8.63 8.5-21.38 8.5H130q-12.75 0-21.37 8.62Q100-642.75 100-630v300q0 12.75 8.63 21.37Q117.25-300 130-300h479q12.75 0 21.38 8.68 8.62 8.67 8.62 21.5 0 12.82-8.62 21.32-8.63 8.5-21.38 8.5H130Zm0-120v-240q0-12.75 8.63-21.38Q147.25-630 160-630h453q19.36 0 27.18 17T636-581L453-353q-8.34 10.73-20.85 16.87Q419.65-330 406-330H160q-12.75 0-21.37-8.63Q130-347.25 130-360Zm589 91q-4 5-9 2.5t-4-8.5l29-165H631q-9.75 0-13.87-8-4.13-8 1.87-16l182-227q4-5 9-2.5t4 8.5l-29 165h104q9.75 0 13.88 8 4.12 8-1.88 16L719-269Z","battery_android_frame_bolt_fill":"M130-240q-37.5 0-63.75-26.25T40-330v-300q0-37.5 26.25-63.75T130-720h539q12.75 0 21.38 8.68 8.62 8.67 8.62 21.5 0 12.82-8.62 21.32-8.63 8.5-21.38 8.5H130q-12.75 0-21.37 8.62Q100-642.75 100-630v300q0 12.75 8.63 21.37Q117.25-300 130-300h479q12.75 0 21.38 8.68 8.62 8.67 8.62 21.5 0 12.82-8.62 21.32-8.63 8.5-21.38 8.5H130Zm0-120v-240q0-12.75 8.63-21.38Q147.25-630 160-630h453q19.36 0 27.18 17T636-581L453-353q-8.34 10.73-20.85 16.87Q419.65-330 406-330H160q-12.75 0-21.37-8.63Q130-347.25 130-360Zm589 91q-4 5-9 2.5t-4-8.5l29-165H631q-9.75 0-13.87-8-4.13-8 1.87-16l182-227q4-5 9-2.5t4 8.5l-29 165h104q9.75 0 13.88 8 4.12 8-1.88 16L719-269Z","refresh":"M480-160q-133 0-226.5-93.5T160-480q0-133 93.5-226.5T480-800q85 0 149 34.5T740-671v-99q0-13 8.5-21.5T770-800q13 0 21.5 8.5T800-770v194q0 13-8.5 21.5T770-546H576q-13 0-21.5-8.5T546-576q0-13 8.5-21.5T576-606h138q-38-60-97-97t-137-37q-109 0-184.5 75.5T220-480q0 109 75.5 184.5T480-220q75 0 140-39.5T717-366q5-11 16.5-16.5t22.5-.5q12 5 16 16.5t-1 23.5q-39 84-117.5 133.5T480-160Z","download":"M469-327q-5-2-10-7L308-485q-9-9.27-8.5-21.64.5-12.36 9.11-21.36 9.39-9 21.89-9t21.5 9l98 99v-341q0-12.75 8.68-21.38 8.67-8.62 21.5-8.62 12.82 0 21.32 8.62 8.5 8.63 8.5 21.38v341l99-99q8.8-9 20.9-8.5 12.1.5 21.49 9.5 8.61 9 8.61 21.5t-9 21.5L501-334q-5 5-10.13 7-5.14 2-11 2-5.87 0-10.87-2ZM220-160q-24 0-42-18t-18-42v-113q0-12.75 8.68-21.38 8.67-8.62 21.5-8.62 12.82 0 21.32 8.62 8.5 8.63 8.5 21.38v113h520v-113q0-12.75 8.68-21.38 8.67-8.62 21.5-8.62 12.82 0 21.32 8.62 8.5 8.63 8.5 21.38v113q0 24-18 42t-42 18H220Z","pause":"M585-200q-24.75 0-42.37-17.63Q525-235.25 525-260v-440q0-24.75 17.63-42.38Q560.25-760 585-760h115q24.75 0 42.38 17.62Q760-724.75 760-700v440q0 24.75-17.62 42.37Q724.75-200 700-200H585Zm-325 0q-24.75 0-42.37-17.63Q200-235.25 200-260v-440q0-24.75 17.63-42.38Q235.25-760 260-760h115q24.75 0 42.38 17.62Q435-724.75 435-700v440q0 24.75-17.62 42.37Q399.75-200 375-200H260Zm325-60h115v-440H585v440Zm-325 0h115v-440H260v440Zm0-440v440-440Zm325 0v440-440Z","play_arrow":"M320-258v-450q0-14 9-22t21-8q4 0 8 1t8 3l354 226q7 5 10.5 11t3.5 14q0 8-3.5 14T720-458L366-232q-4 2-8 3t-8 1q-12 0-21-8t-9-22Zm60-225Zm0 171 269-171-269-171v342Z","restart_alt":"M418-126q-111-21-184.5-109T160-439q0-71 30-134t85-107q8-6 19-5.5t19 8.5q10 10 9 23t-13 23q-42 35-65.5 85.5T220-439q0 94 58 163.5T425-186q11 2 18.5 11t7.5 20q0 14-10 22.5t-23 6.5Zm126 0q-13 2-23-6.5T511-155q0-11 7.5-20t18.5-11q90-20 147-89.5T741-439q0-109-75.5-184.5T481-699h-20l39 39q8 8 8 21t-8 21q-9 9-22 9t-21-9l-91-90q-5-5-7-10t-2-11q0-6 2-11t7-10l91-91q8-8 21-8t22 8q8 9 8 22t-8 21l-39 39h20q134 0 227 93.5T801-439q0 116-73 204T544-126Z","check":"m378-332 363-363q9-9 21.5-9t21.5 9q9 9 9 21.5t-9 21.5L399-267q-9 9-21 9t-21-9L175-449q-9-9-8.5-21.5T176-492q9-9 21.5-9t21.5 9l159 160Z","close":"M480-438 270-228q-9 9-21 9t-21-9q-9-9-9-21t9-21l210-210-210-210q-9-9-9-21t9-21q9-9 21-9t21 9l210 210 210-210q9-9 21-9t21 9q9 9 9 21t-9 21L522-480l210 210q9 9 9 21t-9 21q-9 9-21 9t-21-9L480-438Z","eco":"M213-175q-43.59-45-68.3-104Q120-338 120-400q0-73 25.5-133.5T222-645q62-62 180-90.5T700-759q20 1 36 8t29 20q13 13 20.5 29t8.5 36q3 90-2 164.5T772.5-367Q758-307 735-261t-55 78q-51 51-110 77T444-80q-69 0-126.5-23.5T213-175Zm103 0q25 17 58 26t69.92 9Q497-140 547-162t91-64q27-27 46-70.5t31-103Q727-459 731-534t0-165q-94-2-168.5 2.5T431-680q-57 12-98 30.5T266-604q-42 43-64 91t-22 98q0 48 20.5 100.5T251-230q53-98 127-176t157-123q-87 75-141 162.5T316-175Zm0 0Zm0 0Z","ecg_heart":"M480-480Zm0 360q-18 0-34.5-6.5T416-146L148-415q-35-35-51.5-80T80-589q0-103 67-177t167-74q48 0 90.5 19t75.5 53q32-34 74.5-53t90.5-19q100 0 167.5 74T880-590q0 49-17 94t-51 80L543-146q-13 13-29 19.5t-34 6.5Zm40-510q8 0 14 4t11 10l71 106h188q8-19 12-39t4-41q0-77-50-133.5T645-780q-35 0-67.5 14.5T521-725l-27 29q-3 3-6 5t-8 2q-5 0-8.5-2t-6.5-5l-27-29q-24-26-56.5-40.5T314-780q-75 0-124.5 56.5T140-590q0 21 4 41t12 39h204q8 0 14.5 3.5T385-497l46 70 60-182q3-9 11-15t18-6Zm9 97-61 182q-3 9-11 15t-18 6q-8 0-14-4t-10-10l-71-106H198l261 261q5 5 10 7t11 2q6 0 11-2t10-7l260-261H600q-8 0-14-4t-11-10l-46-69Z","cycle":"M140-480q0 105 57 190t153 125q12 5 17.5 16.5T367-126q-8 12-21 15.5t-27-2.5q-110-48-174.5-147.5T80-480q0-32 5-64.5t16-63.5l-40 23q-11 6-22.5 3.5T21-595q-6-11-3-23t14-18l121-70q11-6 23-3t18 14l70 120q6 11 3 23t-14 18q-11 6-23 3t-18-14l-43-73q-14 33-21.5 67.5T140-480Zm340-340q-57 0-109.5 18T273-749q-11 8-23.5 7.5T231-753q-7-12-4-26t14-22q52-38 113-58.5T480-880q87 0 165 35.5T780-744v-46q0-13 8.5-21.5T810-820q13 0 21.5 8.5T840-790v140q0 13-8.5 21.5T810-620H670q-13 0-21.5-8.5T640-650q0-13 8.5-21.5T670-680h85q-48-66-120.5-103T480-820Zm252 569q51-57 73-129t11-147q-2-13 5.5-23t19.5-10q14 0 24 10.5t12 25.5q8 81-14 157.5T790-227q-44 54-102 89.5T562-88l38 22q11 6 13.5 18T610-25q-6 11-17.5 13.5T570-15L448-85q-11-6-14-18t3-23l70-120q6-11 18-14t23 3q11 6 13.5 17.5T558-217l-43 76q63-6 119-34.5t98-75.5Z","history":"M477-120q-142 0-243.5-95.5T121-451q-1-12 7.5-21t21.5-9q12 0 20.5 8.5T181-451q11 115 95 193t201 78q127 0 215-89t88-216q0-124-89-209.5T477-780q-68 0-127.5 31T246-667h75q13 0 21.5 8.5T351-637q0 13-8.5 21.5T321-607H172q-13 0-21.5-8.5T142-637v-148q0-13 8.5-21.5T172-815q13 0 21.5 8.5T202-785v76q52-61 123.5-96T477-840q75 0 141 28t115.5 76.5Q783-687 811.5-622T840-482q0 75-28.5 141t-78 115Q684-177 618-148.5T477-120Zm34-374 115 113q9 9 9 21.5t-9 21.5q-9 9-21 9t-21-9L460-460q-5-5-7-10.5t-2-11.5v-171q0-13 8.5-21.5T481-683q13 0 21.5 8.5T511-653v159Z","memory":"M377-407v-145q0-12.75 8.63-21.38Q394.25-582 407-582h145q12.75 0 21.38 8.62Q582-564.75 582-552v145q0 12.75-8.62 21.37Q564.75-377 552-377H407q-12.75 0-21.37-8.63Q377-394.25 377-407Zm60-30h85v-85h-85v85Zm-77 287v-50H260q-24 0-42-18t-18-42v-100h-50q-12.75 0-21.37-8.68-8.63-8.67-8.63-21.5 0-12.82 8.63-21.32 8.62-8.5 21.37-8.5h50v-124h-50q-12.75 0-21.37-8.68-8.63-8.67-8.63-21.5 0-12.82 8.63-21.32 8.62-8.5 21.37-8.5h50v-100q0-24 18-42t42-18h100v-46q0-12.75 8.68-21.38 8.67-8.62 21.5-8.62 12.82 0 21.32 8.62 8.5 8.63 8.5 21.38v46h124v-46q0-12.75 8.68-21.38 8.67-8.62 21.5-8.62 12.82 0 21.32 8.62 8.5 8.63 8.5 21.38v46h100q24 0 42 18t18 42v100h46q12.75 0 21.38 8.68 8.62 8.67 8.62 21.5 0 12.82-8.62 21.32-8.63 8.5-21.38 8.5h-46v124h46q12.75 0 21.38 8.68 8.62 8.67 8.62 21.5 0 12.82-8.62 21.32-8.63 8.5-21.38 8.5h-46v100q0 24-18 42t-42 18H604v50q0 12.75-8.68 21.37-8.67 8.63-21.5 8.63-12.82 0-21.32-8.63-8.5-8.62-8.5-21.37v-50H420v50q0 12.75-8.68 21.37-8.67 8.63-21.5 8.63-12.82 0-21.32-8.63-8.5-8.62-8.5-21.37Zm344-110v-444H260v444h444ZM480-480Z","info":"M504.5-288.63q8.5-8.62 8.5-21.37v-180q0-12.75-8.68-21.38-8.67-8.62-21.5-8.62-12.82 0-21.32 8.62-8.5 8.63-8.5 21.38v180q0 12.75 8.68 21.37 8.67 8.63 21.5 8.63 12.82 0 21.32-8.63Zm-1-314.57q9.5-9.2 9.5-22.8 0-14.45-9.48-24.22-9.48-9.78-23.5-9.78t-23.52 9.78Q447-640.45 447-626q0 13.6 9.48 22.8 9.48 9.2 23.5 9.2t23.52-9.2ZM480.27-80q-82.74 0-155.5-31.5Q252-143 197.5-197.5t-86-127.34Q80-397.68 80-480.5t31.5-155.66Q143-709 197.5-763t127.34-85.5Q397.68-880 480.5-880t155.66 31.5Q709-817 763-763t85.5 127Q880-563 880-480.27q0 82.74-31.5 155.5Q817-252 763-197.68q-54 54.31-127 86Q563-80 480.27-80Zm.23-60Q622-140 721-239.5t99-241Q820-622 721.19-721T480-820q-141 0-240.5 98.81T140-480q0 141 99.5 240.5t241 99.5Zm-.5-340Z","notifications":"M190-200q-12.75 0-21.37-8.68-8.63-8.67-8.63-21.5 0-12.82 8.63-21.32 8.62-8.5 21.37-8.5h50v-304q0-84 49.5-150.5T420-798v-22q0-25 17.5-42.5T480-880q25 0 42.5 17.5T540-820v22q81 17 130.5 83.5T720-564v304h50q12.75 0 21.38 8.68 8.62 8.67 8.62 21.5 0 12.82-8.62 21.32-8.63 8.5-21.38 8.5H190Zm290-302Zm0 422q-33 0-56.5-23.5T400-160h160q0 33-23.5 56.5T480-80ZM300-260h360v-304q0-75-52.5-127.5T480-744q-75 0-127.5 52.5T300-564v304Z","timer":"M390-860q-13 0-21.5-8.5T360-890q0-13 8.5-21.5T390-920h180q13 0 21.5 8.5T600-890q0 13-8.5 21.5T570-860H390Zm111.5 438.5Q510-430 510-443v-170q0-13-8.5-21.5T480-643q-13 0-21.5 8.5T450-613v170q0 13 8.5 21.5T480-413q13 0 21.5-8.5Zm-161 312Q275-138 226-187t-77.5-114.5Q120-367 120-441t28.5-139.5Q177-646 226-695t114.5-77.5Q406-801 480-801q67 0 126 22.5T711-716l30-30q9-9 21-9t21 9q9 9 9 21t-9 21l-30 30q36 40 61.5 97T840-441q0 74-28.5 139.5T734-187q-49 49-114.5 77.5T480-81q-74 0-139.5-28.5Zm352-119Q780-316 780-441t-87.5-212.5Q605-741 480-741t-212.5 87.5Q180-566 180-441t87.5 212.5Q355-141 480-141t212.5-87.5ZM480-440Z","hourglass_top":"M308-140h344v-127q0-72-50-121.5T480-438q-72 0-122 49.5T308-267v127ZM190-80q-13 0-21.5-8.5T160-110q0-13 8.5-21.5T190-140h58v-127q0-71 40-129t106-84q-66-27-106-85t-40-129v-126h-58q-13 0-21.5-8.5T160-850q0-13 8.5-21.5T190-880h580q13 0 21.5 8.5T800-850q0 13-8.5 21.5T770-820h-58v126q0 71-40 129t-106 85q66 26 106 84t40 129v127h58q13 0 21.5 8.5T800-110q0 13-8.5 21.5T770-80H190Z","warning":"M92-120q-9 0-15.5-4T66-135q-4-7-4.5-14.5T66-165l388-670q5-8 11.5-11.5T480-850q8 0 14.5 3.5T506-835l388 670q5 8 4.5 15.5T894-135q-4 7-10.5 11t-15.5 4H92Zm52-60h672L480-760 144-180Zm361.5-65.5Q514-254 514-267t-8.5-21.5Q497-297 484-297t-21.5 8.5Q454-280 454-267t8.5 21.5Q471-237 484-237t21.5-8.5Zm0-111Q514-365 514-378v-164q0-13-8.5-21.5T484-572q-13 0-21.5 8.5T454-542v164q0 13 8.5 21.5T484-348q13 0 21.5-8.5ZM480-470Z","heat":"M526-129q-5 4-10.5 6t-10.5 2q-6 0-11-2t-10-7q-41-43-61-89t-20-96q0-36 11-76.5T453-501q26-60 35-92.5t9-59.5q0-38-16.5-71T429-789q-5-5-7-10.5t-2-11.5q0-5 1.5-10t5.5-10q5-5 10.5-7.5T449-841q5 0 10.5 2t10.5 7q44 41 65.5 85t21.5 94q0 34-10 71.5T509-478q-26 61-36 96.5T463-316q0 39 16 74.5t49 70.5q4 5 5.5 10t1.5 10q0 6-2 11.5t-7 10.5Zm203 1q-5 4-10 5.5t-10 1.5q-6 0-11.5-2t-10.5-7q-41-43-61-88.5T606-314q0-36 11-76.5T656-500q26-60 35-92.5t9-59.5q0-38-16.5-70.5T632-788q-5-5-6.5-10t-1.5-11q0-5 1.5-10.5T631-830q5-5 10.5-7t11.5-2q5 0 10 1.5t10 5.5q44 41 65.5 85t21.5 94q0 34-10 71t-38 105q-26 60-36 95.5T666-316q0 39 16 75.5t49 70.5q4 5 5.5 10t1.5 10q0 6-2 11.5t-7 10.5Zm-406 0q-5 4-10 5.5t-10 1.5q-6 0-11.5-2t-10.5-7q-41-43-61-88.5T200-314q0-36 11-76.5T250-500q26-60 35-92.5t9-59.5q0-38-16.5-70.5T226-788q-5-5-7-10.5t-2-11.5q0-5 1.5-10.5T224-831q5-5 10.5-7.5T246-841q5 0 10.5 2t10.5 7q44 41 65.5 85t21.5 94q0 34-10.5 72.5T306-477q-25 60-35 95t-10 66q0 40 16 76t48 70q4 5 5.5 10t1.5 10q0 6-2 11.5t-7 10.5Z","cable":"M190-120q-13 0-21.5-8.5T160-150v-50h-10q-13 0-21.5-8.5T120-230v-120q0-13 8.5-21.5T150-380h50v-310q0-64 47-107t113-43q63 0 106.5 43.5T510-690v420q0 38 26 64t64 26q41 0 70.5-25.5T700-270v-310h-50q-13 0-21.5-8.5T620-610v-120q0-13 8.5-21.5T650-760h10v-50q0-13 8.5-21.5T690-840h80q13 0 21.5 8.5T800-810v50h10q13 0 21.5 8.5T840-730v120q0 13-8.5 21.5T810-580h-50v310q0 64-47 107t-113 43q-63 0-106.5-43.5T450-270v-420q0-38-26-64t-64-26q-41 0-70.5 25.5T260-690v310h50q13 0 21.5 8.5T340-350v120q0 13-8.5 21.5T310-200h-10v50q0 13-8.5 21.5T270-120h-80Z","electric_bolt":"m457-386-272-32q-19-2-25-20.5t8-31.5l440-404q4-3 8.5-5t13.5-2q15 0 23 12.5t0 25.5L503-574l272 32q19 2 25 20.5t-8 31.5L352-86q-4 3-8.5 5T330-79q-15 0-23-12.5t0-25.5l150-269Zm-4 120 252-223-297-36 99-169-253 224 297 35-98 169Zm27-214Z","battery_alert":"M310-80q-12.75 0-21.37-8.63Q280-97.25 280-110v-676q0-12.75 8.63-21.38Q297.25-816 310-816h90v-34q0-12.75 8.63-21.38Q417.25-880 430-880h100q12.75 0 21.38 8.62Q560-862.75 560-850v34h90q12.75 0 21.38 8.62Q680-798.75 680-786v676q0 12.75-8.62 21.37Q662.75-80 650-80H310Zm30-60h280v-616H340v616Zm0 0h280-280Zm161.5-271.63q8.5-8.62 8.5-21.37v-180q0-12.75-8.68-21.38-8.67-8.62-21.5-8.62-12.82 0-21.32 8.62-8.5 8.63-8.5 21.38v180q0 12.75 8.68 21.37 8.67 8.63 21.5 8.63 12.82 0 21.32-8.63ZM480.5-253q12.5 0 21-9t8.5-21.5q0-12.5-8.62-21-8.63-8.5-21.38-8.5-12 0-21 8.62-9 8.63-9 21.38 0 12 9 21t21.5 9Z","schedule":"M513-492v-171q0-13-8.5-21.5T483-693q-13 0-21.5 8.5T453-663v183q0 6 2 11t6 10l144 149q9 10 22.5 9.5T650-310q9-9 9-22t-9-22L513-492ZM480-80q-82 0-155-31.5t-127.5-86Q143-252 111.5-325T80-480q0-82 31.5-155t86-127.5Q252-817 325-848.5T480-880q82 0 155 31.5t127.5 86Q817-708 848.5-635T880-480q0 82-31.5 155t-86 127.5Q708-143 635-111.5T480-80Zm0-400Zm0 340q140 0 240-100t100-240q0-140-100-240T480-820q-140 0-240 100T140-480q0 140 100 240t240 100Z","speed":"M473.5-303.5Q517-305 537-336l179-280q7-11-1.5-19.5T695-637L418-456q-30 20-32 64t21 67q23 23 66.5 21.5ZM478-799q45 0 94.5 12t97.5 39q11 7 15 19.31 4 12.31-4 23.5t-20.5 12.69Q648-691 636-697q-41-22-83.5-32T478-739q-140.48 0-239.24 100.22Q140-538.57 140-396.02 140-351 152.5-305q12.5 46 35.5 85h579q22-36 35-84t13-94q0-35-9-75.5T776-551q-7-11-5.5-24t12.5-20q10.64-8 23.32-4T825-583q23 45 35.5 89.5T875-404q2 60-12 113t-41 98q-12 23-25.5 28t-33.5 5H192q-17 0-33.5-8.5T134-193q-26-48-40-97.5T80-396q0-83 31.5-156.5t85.5-128Q251-735 323.68-767T478-799Zm-9 331Z","power_settings_new":"M480-80q-82 0-155-31.5t-127.5-86Q143-252 111.5-325T80-480q0-75 26-142t72-120q9-11 21-10.5t20 8.5q8 8 10.5 20t-8.5 24q-38 45-59.5 101T140-480q0 141 99.5 240.5T480-140q142 0 241-99.5T820-480q0-63-21-119t-59-101q-11-12-9-24t10-20q8-8 20-8.5t21 10.5q46 53 72 120t26 142q0 82-31.5 155T763-197.5q-54 54.5-127 86T480-80Zm-21.5-368.5Q450-457 450-470v-380q0-13 8.5-21.5T480-880q13 0 21.5 8.5T510-850v380q0 13-8.5 21.5T480-440q-13 0-21.5-8.5Z","search_activity":"M510-492.18 633-369q9 9 9 21t-9 21q-9 9-21 9t-21-9L459-459q-5-5-7-10.22-2-5.21-2-10.78v-160q0-12.75 8.68-21.38 8.67-8.62 21.5-8.62 12.82 0 21.32 8.62 8.5 8.63 8.5 21.38v147.82Zm71.5-289.46q-11.5-11.64-11.5-28.5t11.64-28.36q11.64-11.5 28.5-11.5t28.36 11.64q11.5 11.64 11.5 28.5t-11.64 28.36q-11.64 11.5-28.5 11.5t-28.36-11.64Zm0 660q-11.5-11.64-11.5-28.5t11.64-28.36q11.64-11.5 28.5-11.5t28.36 11.64q11.5 11.64 11.5 28.5t-11.64 28.36q-11.64 11.5-28.5 11.5t-28.36-11.64Zm160-520q-11.5-11.64-11.5-28.5t11.64-28.36q11.64-11.5 28.5-11.5t28.36 11.64q11.5 11.64 11.5 28.5t-11.64 28.36q-11.64 11.5-28.5 11.5t-28.36-11.64Zm0 380q-11.5-11.64-11.5-28.5t11.64-28.36q11.64-11.5 28.5-11.5t28.36 11.64q11.5 11.64 11.5 28.5t-11.64 28.36q-11.64 11.5-28.5 11.5t-28.36-11.64Zm60-190q-11.5-11.64-11.5-28.5t11.64-28.36q11.64-11.5 28.5-11.5t28.36 11.64q11.5 11.64 11.5 28.5t-11.64 28.36q-11.64 11.5-28.5 11.5t-28.36-11.64ZM186-752q106-114 261-127 13-1 23 7.62 10 8.63 10 21.38 0 12-7.95 20.77-7.94 8.77-20.05 10.23-132 11-222 108.13-90 97.14-90 230.96Q140-345 230-248.5T452-141q12.11 1.48 20.05 10.33Q480-121.81 480-110q0 12.75-10 21.37Q460-80 447-81 292-94 186-207.84q-106-113.83-106-272Q80-638 186-752Z","trending_down":"M780-300 539-541 414-416q-16.93 17-41.97 17Q347-399 330-416L102-644q-9-9-9-21.5t9-21.5q9-9 21.5-9t21.5 9l226 227 125-125q16.93-17 41.97-17Q563-602 580-585l241 241v-94q0-12.33 9-20.66 9-8.34 21.23-8.34t20.5 8.34Q880-450.33 880-438v168q0 12.75-8.62 21.37Q862.75-240 850-240H683q-12.75 0-21.37-8.68-8.63-8.67-8.63-21.5 0-12.82 8.63-21.32 8.62-8.5 21.37-8.5h97Z"};
+const MODDIR = "/data/adb/modules/veux_charge_limiter";
+const CLI = "sh " + MODDIR + "/cli.sh";
+const HAS_KSU = typeof window.ksu !== "undefined" && typeof window.ksu.exec === "function";
+const $ = (id) => document.getElementById(id);
+const REDUCED = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+const svgIcon = (name, cls) => '<svg class="i' + (cls ? " " + cls : "") + '" viewBox="0 -960 960 960"><path d="' + (ICONS[name] || "") + '"/></svg>';
+function hydrateIcons(root) { root.querySelectorAll("path[data-icon]").forEach((p) => p.setAttribute("d", ICONS[p.dataset.icon] || "")); }
+function css(name) { return getComputedStyle(document.documentElement).getPropertyValue(name).trim(); }
+
+// ======================================================= exec (API KernelSU)
+let cbSeq = 0;
+function exec(cmd) {
+  if (!HAS_KSU) return Promise.resolve(Mock.exec(cmd));
+  return new Promise((resolve, reject) => {
+    const name = "vcl_cb_" + Date.now() + "_" + (cbSeq++);
+    const timer = setTimeout(() => { delete window[name]; reject(new Error("timeout")); }, 20000);
+    window[name] = (errno, stdout, stderr) => { clearTimeout(timer); delete window[name]; resolve({ errno, stdout: stdout || "", stderr: stderr || "" }); };
+    try { window.ksu.exec(cmd, "{}", name); } catch (e) { clearTimeout(timer); delete window[name]; reject(e); }
+  });
+}
+async function cli(args) { return (await exec(CLI + " " + args)).stdout || ""; }
+function parseKV(t) { const o = {}; t.split("\n").forEach((l) => { const i = l.indexOf("="); if (i > 0) o[l.slice(0, i).trim()] = l.slice(i + 1).trim(); }); return o; }
+function parseCSV(text) {
+  const lines = text.trim().split("\n"); if (lines.length < 2) return [];
+  const head = lines[0].split(","), out = [];
+  for (let i = 1; i < lines.length; i++) {
+    const c = lines[i].split(","); if (c.length !== head.length) continue;
+    const o = {}; head.forEach((h, j) => { o[h] = (h === "state" || h === "date") ? c[j] : Number(c[j]); }); out.push(o);
+  }
+  return out;
+}
+const num = (v, d) => { const n = Number(v); return Number.isFinite(n) ? n : (d === undefined ? NaN : d); };
+const hhmm = (ts) => { const d = new Date(ts * 1000); return String(d.getHours()).padStart(2, "0") + ":" + String(d.getMinutes()).padStart(2, "0"); };
+const it = (x, d) => (d === undefined ? String(x) : x.toFixed(d)).replace(".", ",");
+const al = (n) => (/^(8|11?$|11)/.test(String(n)) ? "all'" : "al ") + n + "%";
+const fmtDur = (h) => h >= 48 ? it(h / 24, 1) + " g" : h >= 1 ? it(h, 1) + " h" : Math.round(h * 60) + " min";
+
+// ================================================================ snackbar
+function snack(msg) {
+  if (HAS_KSU && typeof window.ksu.toast === "function") { try { window.ksu.toast(msg); return; } catch (e) {} }
+  const s = $("snack"); s.textContent = msg; s.classList.add("show");
+  clearTimeout(snack._t); snack._t = setTimeout(() => s.classList.remove("show"), 2600);
+}
+
+// ================================================ colore dinamico (Monet)
+// 1) KernelSU / WebUI X: colors.css definisce --primary ecc. -> usati via CSS.
+// 2) Altrimenti (es. Magisk + KsuWebUI): legge il colore del tema Android con
+//    cli.sh theme e rigenera la palette con Material Color Utilities.
+// 3) Altrimenti: palette verde di riserva già nel CSS.
+async function applyDynamicColor() {
+  if (css("--primary")) return "host";
+  if (typeof MCU === "undefined") return "fallback";
+  let seed = null, style = "TONAL_SPOT";
+  try {
+    const t = parseKV(await cli("theme"));
+    const j = JSON.parse(t.THEME || "{}");
+    const pal = j["android.theme.customization.system_palette"] || j["android.theme.customization.accent_color"];
+    if (pal && /^(0x)?#?[0-9a-f]{6,8}$/i.test(pal)) seed = "#" + pal.replace(/^(0x)?#?/i, "").slice(-6);
+    if (j["android.theme.customization.theme_style"]) style = j["android.theme.customization.theme_style"];
+  } catch (e) {}
+  if (!seed) return "fallback";
+  const sc = MCU.scheme(seed, style);
+  const kebab = (k) => k.replace(/[A-Z]/g, (m) => "-" + m.toLowerCase());
+  const apply = () => {
+    const mode = window.matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light";
+    Object.entries(sc[mode]).forEach(([k, v]) => document.documentElement.style.setProperty("--md-" + kebab(k), v));
+    Object.values(charts).forEach(draw);
+  };
+  apply();
+  window.matchMedia("(prefers-color-scheme: dark)").addEventListener("change", apply);
+  return "device";
+}
+
+// ======================================================= molle (JS) e forme
+// Molla fisica (massa 1) per le animazioni che CSS non sa fare (morph di forma, onda).
+function spring(from, to, z, k, onUpdate, onDone) {
+  if (REDUCED) { onUpdate(to); onDone && onDone(); return () => {}; }
+  let x = from, v = 0, last = performance.now(), raf = 0, stop = false;
+  const w = Math.sqrt(k);
+  const step = (now) => {
+    if (stop) return;
+    let dt = Math.min(.064, (now - last) / 1000); last = now;
+    const n = 8; for (let i = 0; i < n; i++) { const a = -k * (x - to) - 2 * z * w * v; v += a * dt / n; x += v * dt / n; }
+    onUpdate(x);
+    if (Math.abs(x - to) < 1e-3 && Math.abs(v) < 1e-3) { onUpdate(to); onDone && onDone(); return; }
+    raf = requestAnimationFrame(step);
+  };
+  raf = requestAnimationFrame(step);
+  return () => { stop = true; cancelAnimationFrame(raf); };
+}
+const SPR = { fastSpatial: [0.6, 800], defaultSpatial: [0.8, 380], slowSpatial: [0.8, 200] };
+
+// Forme della libreria Expressive, approssimate come curve polari morbide:
+// k = numero di lobi, d = profondità. Interpolando i raggi si ottiene il morph.
+const SHAPES = {
+  circle: [0, 0], cookie4: [4, .16], pentagon: [5, .10], cookie6: [6, .10], sunny: [8, .085],
+  cookie9: [9, .08], cookie12: [12, .055], burst: [12, .16], softBurst: [10, .12]
+};
+const N_PTS = 180;
+function radii(name) {
+  const [k, d] = SHAPES[name] || SHAPES.circle, r = new Float32Array(N_PTS);
+  for (let i = 0; i < N_PTS; i++) { const t = i / N_PTS * Math.PI * 2; r[i] = 1 - d * (1 - Math.cos(k * t)) / 2; }
+  let mx = 0; r.forEach((v) => { mx = Math.max(mx, v); }); for (let i = 0; i < N_PTS; i++) r[i] /= mx;
+  return r;
+}
+function shapePath(ra, rb, t, size, rot) {
+  let d = "";
+  for (let i = 0; i < N_PTS; i++) {
+    const a = i / N_PTS * Math.PI * 2 + rot - Math.PI / 2;
+    const r = (ra[i] + (rb[i] - ra[i]) * t) * size;
+    d += (i ? "L" : "M") + (Math.cos(a) * r).toFixed(2) + " " + (Math.sin(a) * r).toFixed(2);
+  }
+  return d + "Z";
+}
+class Morph {
+  constructor(path, size) { this.path = path; this.size = size; this.cur = radii("circle"); this.rot = 0; this.cancel = null; this.draw(this.cur, this.cur, 0); }
+  draw(a, b, t) { this.path.setAttribute("d", shapePath(a, b, t, this.size, this.rot)); }
+  to(name) {
+    if (this.name === name) return; this.name = name;
+    const from = this.cur.slice(), target = radii(name);
+    this.cancel && this.cancel();
+    this.cancel = spring(0, 1, ...SPR.defaultSpatial, (t) => {
+      const tt = Math.max(0, Math.min(1.15, t));
+      for (let i = 0; i < N_PTS; i++) this.cur[i] = from[i] + (target[i] - from[i]) * tt;
+      this.draw(this.cur, this.cur, 0);
+    });
+  }
+  spin(rad) { this.rot = rad; this.draw(this.cur, this.cur, 0); }
+}
+
+// Indicatore di caricamento: morph continuo tra forme + rotazione
+const LOADER_SEQ = ["softBurst", "cookie9", "pentagon", "sunny", "cookie4", "circle"];
+function runLoader(svgPath) {
+  const ras = LOADER_SEQ.map(radii); let i = 0, t0 = performance.now(), raf = 0;
+  const step = (now) => {
+    const e = (now - t0) / 650; if (e >= 1) { i = (i + 1) % ras.length; t0 = now; }
+    const t = Math.min(1, e), ease = 1 - Math.pow(1 - t, 3);
+    svgPath.setAttribute("d", shapePath(ras[i], ras[(i + 1) % ras.length], ease, 26, now / 900));
+    raf = requestAnimationFrame(step);
+  };
+  raf = requestAnimationFrame(step);
+  return () => cancelAnimationFrame(raf);
+}
+
+// ============================================== anello di progresso ondulato
+const RING = { cx: 104, cy: 104, r: 90, stroke: 12, gap: 6, waves: 14 };
+const ring = { pct: 0, amp: 0, phase: 0, waving: false, raf: 0, cancelAmp: null, shown: 0 };
+function arcPath(a0, a1, amp, phase) {
+  let d = "", steps = Math.max(2, Math.ceil((a1 - a0) / (Math.PI / 120)));
+  for (let i = 0; i <= steps; i++) {
+    const a = a0 + (a1 - a0) * i / steps;
+    const r = RING.r + amp * Math.sin(RING.waves * a + phase);
+    d += (i ? "L" : "M") + (RING.cx + Math.cos(a) * r).toFixed(2) + " " + (RING.cy + Math.sin(a) * r).toFixed(2);
+  }
+  return d;
+}
+function drawRing() {
+  const start = -Math.PI / 2, p = Math.max(0, Math.min(1, ring.shown / 100));
+  const gapA = (RING.gap + RING.stroke) / RING.r;
+  const end = start + Math.max(0.0001, p * Math.PI * 2);
+  // l'ampiezza si riduce vicino a 0% e 100% (come l'indicatore di Compose)
+  const amp = ring.amp * Math.min(1, p * 8, (1 - p) * 8 + .25);
+  $("ringInd").setAttribute("d", p > 0.004 ? arcPath(start, end, amp, ring.phase) : "");
+  const t0 = end + gapA, t1 = start + Math.PI * 2 - gapA;
+  $("ringTrack").setAttribute("d", p < 0.995 && t1 > t0 ? arcPath(t0, t1, 0, 0) : "");
+  [["mMin", ring.min], ["mMax", ring.max]].forEach(([id, v]) => {
+    const el = $(id); if (!Number.isFinite(v) || v / 100 <= p + .02) { el.style.display = "none"; return; }
+    const a = start + v / 100 * Math.PI * 2; el.style.display = "";
+    el.setAttribute("cx", (RING.cx + Math.cos(a) * RING.r).toFixed(2)); el.setAttribute("cy", (RING.cy + Math.sin(a) * RING.r).toFixed(2));
+  });
+}
+function setRing(pct, waving, min, max) {
+  ring.min = min; ring.max = max;
+  if (ring.pctCancel) ring.pctCancel();
+  ring.pctCancel = spring(ring.shown, pct, ...SPR.slowSpatial, (v) => { ring.shown = v; drawRing(); });
+  if (waving !== ring.waving) {
+    ring.waving = waving;
+    ring.cancelAmp && ring.cancelAmp();
+    ring.cancelAmp = spring(ring.amp, waving ? 3.2 : 0, ...SPR.defaultSpatial, (v) => { ring.amp = Math.max(0, v); drawRing(); });
+  }
+  if (waving && !ring.raf && !REDUCED) {
+    const step = (now) => { ring.phase = -now / 520; drawRing(); ring.raf = ring.waving || ring.amp > .05 ? requestAnimationFrame(step) : 0; };
+    ring.raf = requestAnimationFrame(step);
+  }
+}
+
+// ================================================================== stato
+const STATE_INFO = {
+  CHARGING:      { t: "In carica", s: (s) => "Si ferma " + al(s.MAX_LEVEL), shape: "sunny", tone: "primary", icon: "battery_charging_full", wave: true },
+  CHARGING_SOFT: { t: "Carica lenta", s: (s) => "Batteria calda: corrente ridotta a " + s.LIMIT_MA + " mA", shape: "sunny", tone: "tertiary", icon: "heat", wave: true },
+  FULL_ONCE:     { t: "Carica al 100%", s: () => "Una tantum, poi torna al ciclo normale", shape: "softBurst", tone: "primary", icon: "battery_charging_full", wave: true },
+  SMART:         { t: "Carica smart", s: (s) => "100% entro le " + hhmm(num(s.SMART_TARGET)), shape: "softBurst", tone: "tertiary", icon: "alarm", wave: true },
+  EMERGENCY:     { t: "Ricarica di emergenza", s: () => "Batteria sotto il 15%", shape: "burst", tone: "error", icon: "battery_alert", wave: true },
+  HOLD:          { t: "Carica sospesa", s: (s) => "Collegato: il telefono usa la batteria. Riprende " + al(s.MIN_LEVEL), shape: "cookie12", tone: "secondary", icon: "pause", wave: false },
+  THERMAL_PAUSE: { t: "Pausa termica", s: () => "Riprende quando la batteria si raffredda", shape: "burst", tone: "error", icon: "device_thermostat", wave: false },
+  UNPLUGGED:     { t: "Cavo scollegato", s: (s) => "Ciclo " + s.MIN_LEVEL + "–" + s.MAX_LEVEL + "%", shape: "pentagon", tone: "secondary", icon: "power_off", wave: false },
+  PAUSED:        { t: "Modulo in pausa", s: () => "Carica e velocità standard", shape: "circle", tone: "neutral", icon: "pause", wave: false },
+  STOPPED:       { t: "Demone fermo", s: () => "Usa «Riavvia demone» qui sotto", shape: "cookie4", tone: "error", icon: "power_settings_new", wave: false },
+  STARTING:      { t: "Avvio…", s: () => "", shape: "circle", tone: "neutral", icon: "hourglass_top", wave: false }
+};
+const TONES = {
+  primary:   ["--md-primary-container", "--md-on-primary-container"],
+  secondary: ["--md-secondary-container", "--md-on-secondary-container"],
+  tertiary:  ["--md-tertiary-container", "--md-on-tertiary-container"],
+  error:     ["--md-error-container", "--md-on-error-container"],
+  neutral:   ["--md-surface-container-highest", "--md-on-surface-variant"]
+};
+let S = {}, CFG = {}, badge = null;
+
+async function refreshStatus() {
+  try { S = parseKV(await cli("status")); } catch (e) { return; }
+  const cap = num(S.CAPACITY, 0), mn = num(S.MIN_LEVEL, num(CFG.MIN_LEVEL, 20)), mx = num(S.MAX_LEVEL, num(CFG.MAX_LEVEL, 80));
+  const info = STATE_INFO[S.STATE] || { t: S.STATE || "?", s: () => "", shape: "circle", tone: "neutral", icon: "info", wave: false };
+  $("pct").textContent = String(cap);
+  const sm = document.createElement("small"); sm.textContent = "%"; $("pct").append(sm);
+  $("pctSub").textContent = S.BAT_STATUS === "Charging" ? "in carica" : S.USB_ONLINE === "1" ? "collegato" : "batteria";
+  $("ringBox").setAttribute("aria-label", "Livello batteria " + cap + "%");
+  setRing(cap, info.wave && S.BAT_STATUS === "Charging", mn, mx);
+  $("stTxt").textContent = info.t; $("stSub").textContent = info.s(S);
+  const [bg, fg] = TONES[info.tone];
+  $("badgeSvg").style.fill = "var(" + bg + ")"; $("badgeIcon").style.color = "var(" + fg + ")";
+  $("badgeIcon").querySelector("path").setAttribute("d", ICONS[info.icon] || "");
+  badge.to(info.shape);
+  $("windowTxt").textContent = "Ciclo " + mn + "–" + mx + "%";
+
+  const running = S.DAEMON && S.DAEMON !== "0";
+  $("daemonDot").classList.toggle("on", running);
+  $("subtitle").textContent = (S.VERSION ? S.VERSION + " · " : "") + (running ? "demone attivo" : "demone fermo");
+
+  const t = num(S.TEMP_DEC) / 10;
+  $("tTemp").textContent = Number.isFinite(t) ? it(t, 1) + " °C" : "--";
+  $("tTempS").textContent = S.THERMAL_PAUSED === "1" ? "pausa termica" : S.SOFT_ACTIVE === "1" ? "corrente ridotta" : "nella norma";
+  $("tileTemp").classList.toggle("hot", S.THERMAL_PAUSED === "1" || S.SOFT_ACTIVE === "1");
+  $("tCurr").textContent = Math.abs(num(S.CURRENT_MA, 0)) + " mA";
+  $("tCurrS").textContent = S.BAT_STATUS === "Charging" ? "in entrata" : S.USB_ONLINE === "1" ? "collegato, in uscita" : "in uscita";
+  const lim = num(S.LIMIT_MA, 0), orig = num(S.ORIG_MAX_MA, 12200);
+  $("tLim").textContent = lim >= orig ? "Max" : lim + " mA";
+  $("tLimS").textContent = lim >= orig ? "velocità originale" : "≈ " + it(lim * 4.4 / 1000, 1) + " W";
+  $("tVolt").textContent = it(num(S.VOLTAGE_MV, 0) / 1000, 2) + " V";
+  $("tVoltS").textContent = "kernel: " + (S.BAT_STATUS || "?");
+
+  $("hSoh").textContent = S.SOH ? S.SOH + "%" : "--";
+  const cf = num(S.CHARGE_FULL_MAH, 0), cd = num(S.DESIGN_MAH, 0);
+  $("hCap").textContent = cf > 0 ? cf + " mAh" : "--";
+  $("hCapS").textContent = cd > 0 && cf > 0 ? Math.round(cf / cd * 100) + "% dei " + cd + " mAh di progetto" : "Non disponibile";
+  $("hEq").textContent = it(num(S.PCT_IN, 0) / 100, 1);
+  const since = num(S.STATS_SINCE, 0);
+  $("hEqS").textContent = since > 0 ? "Dal " + new Date(since * 1000).toLocaleDateString("it-IT") : "Da quando è installato";
+  $("hCyc").textContent = S.CYCLE_COUNT || "--";
+
+  const ff = S.FORCE_FULL === "1", paused = S.STATE === "PAUSED";
+  $("aFull").setAttribute("aria-pressed", String(ff)); $("aFull").querySelector("span").textContent = ff ? "100% attivo" : "100% ora";
+  $("aPause").setAttribute("aria-pressed", String(paused)); $("aPause").querySelector("span").textContent = paused ? "In pausa" : "Pausa";
+  $("aPause").querySelector("path").setAttribute("d", ICONS[paused ? "play_arrow" : "pause"]);
+  if (S.SMART_CHARGE === "1") {
+    $("smartBox").hidden = false;
+    $("smartTxt").textContent = num(S.SMART_TARGET, 0) > 0
+      ? "100% per le " + hhmm(num(S.SMART_TARGET)) + ", partenza prevista alle " + hhmm(num(S.SMART_START))
+      : "Nessuna sveglia rilevata: si aggiorna con il cavo collegato";
+  } else $("smartBox").hidden = true;
+
+  const wb = $("warnBanner");
+  if (S.MAGISK_DISABLED === "1") { $("warnText").textContent = "Il modulo è disattivato nell'app root: la carica è standard."; wb.classList.add("show"); }
+  else if (!running) { $("warnText").textContent = "Il demone non è in esecuzione: premi «Riavvia demone»."; wb.classList.add("show"); }
+  else wb.classList.remove("show");
+}
+async function loadConfig() { CFG = parseKV(await cli("config")); }
+
+// ================================================ pulsanti connessi (periodo)
+function connected(id, opts, active, onPick) {
+  const box = $(id); box.innerHTML = "";
+  opts.forEach(([v, label]) => {
+    const b = document.createElement("button");
+    b.className = "btn s sl"; b.setAttribute("role", "radio"); b.dataset.v = v;
+    b.setAttribute("aria-checked", String(v === active));
+    b.innerHTML = '<span class="ck">' + svgIcon("check") + "</span>";
+    b.append(document.createTextNode(label));
+    b.addEventListener("click", () => {
+      box.querySelectorAll("button").forEach((x) => x.setAttribute("aria-checked", String(x === b)));
+      onPick(v);
+    });
+    box.append(b);
+  });
+}
+const RANGES = [[1, "24 ore"], [3, "3 g"], [7, "7 g"], [30, "30 g"]];
+
+// ================================================================= grafici
+let STATS = [], statsDays = 0;
+async function loadStats(days) {
+  if (statsDays >= days && STATS.length) return;
+  STATS = parseCSV(await cli("stats " + Math.max(days, 7))); statsDays = Math.max(days, 7);
+}
+const CHARGING_STATES = new Set(["CHARGING", "CHARGING_SOFT", "FULL_ONCE", "SMART", "EMERGENCY"]);
+const bandOf = (r) => !r.usb ? null : CHARGING_STATES.has(r.state) ? "charge" : r.state === "HOLD" ? "hold" : r.state === "THERMAL_PAUSE" ? "thermal" : null;
+const STATE_LABEL = { CHARGING: "in carica", CHARGING_SOFT: "carica lenta", FULL_ONCE: "carica 100%", SMART: "carica smart", EMERGENCY: "emergenza",
+  HOLD: "sospesa", THERMAL_PAUSE: "pausa termica", UNPLUGGED: "scollegato", PAUSED: "modulo in pausa" };
+function bandColors() {
+  const root = document.documentElement;
+  root.style.setProperty("--band-charge", "color-mix(in srgb, " + css("--md-primary") + " 18%, transparent)");
+  root.style.setProperty("--band-hold", "color-mix(in srgb, " + css("--md-on-surface-variant") + " 12%, transparent)");
+  root.style.setProperty("--band-thermal", "color-mix(in srgb, " + css("--md-error") + " 22%, transparent)");
+}
+const charts = {};
+function setupChart(id) {
+  const canvas = $(id), box = canvas.parentElement, tip = box.querySelector(".tip");
+  const ch = { canvas, box, tip, opts: null, hover: null, stopLoader: null };
+  const move = (ev) => {
+    if (!ch.opts || !ch.opts.pts.length || !ch.geom) return;
+    const r = canvas.getBoundingClientRect(), g = ch.geom, p = ch.opts.pts;
+    const t = g.t0 + (ev.clientX - r.left - g.L) / g.W * (g.t1 - g.t0);
+    let lo = 0, hi = p.length - 1; while (lo < hi) { const m = (lo + hi) >> 1; if (p[m].t < t) lo = m + 1; else hi = m; }
+    let best = lo; if (lo > 0 && Math.abs(p[lo - 1].t - t) < Math.abs(p[lo].t - t)) best = lo - 1;
+    ch.hover = best; draw(ch);
+    const pt = p[best]; tip.innerHTML = "";
+    const b = document.createElement("b"); b.textContent = ch.opts.fmt(pt.v);
+    const s = document.createElement("span"); s.className = "body-s";
+    s.textContent = new Date(pt.t * 1000).toLocaleDateString("it-IT", { weekday: "short", day: "numeric" }) + " " + hhmm(pt.t) + (pt.label ? " · " + pt.label : "");
+    tip.append(b, s); tip.style.display = "block";
+    const px = g.L + (pt.t - g.t0) / (g.t1 - g.t0) * g.W, tw = tip.offsetWidth;
+    tip.style.left = Math.max(0, Math.min(r.width - tw, px - tw / 2)) + "px";
+  };
+  const leave = () => { ch.hover = null; tip.style.display = "none"; draw(ch); };
+  canvas.addEventListener("pointermove", move); canvas.addEventListener("pointerdown", move);
+  canvas.addEventListener("pointerleave", leave); canvas.addEventListener("pointercancel", leave);
+  charts[id] = ch; return ch;
+}
+function setLoading(ch, on) {
+  ch.box.classList.toggle("loading", on);
+  if (on && !ch.stopLoader) ch.stopLoader = runLoader(ch.box.querySelector(".loader path"));
+  if (!on && ch.stopLoader) { ch.stopLoader(); ch.stopLoader = null; }
+}
+function niceTicks(min, max, n) {
+  const span = max - min || 1, step0 = span / n, mag = Math.pow(10, Math.floor(Math.log10(step0)));
+  const step = [1, 2, 2.5, 5, 10].map((m) => m * mag).find((s) => s >= step0) || mag * 10;
+  const out = []; for (let v = Math.ceil(min / step) * step; v <= max + 1e-9; v += step) out.push(+v.toFixed(6)); return out;
+}
+function draw(ch) {
+  const o = ch.opts; if (!o) return;
+  const c = ch.canvas, dpr = window.devicePixelRatio || 1, w = c.clientWidth, h = c.clientHeight;
+  if (!w) return;
+  if (c.width !== Math.round(w * dpr) || c.height !== Math.round(h * dpr)) { c.width = Math.round(w * dpr); c.height = Math.round(h * dpr); }
+  const x = c.getContext("2d"); x.setTransform(dpr, 0, 0, dpr, 0, 0); x.clearRect(0, 0, w, h);
+  const L = 36, R = 4, T = 8, B = 22, W = w - L - R, H = h - T - B, t0 = o.t0, t1 = o.t1;
+  ch.geom = { L, W, t0, t1 };
+  const X = (t) => L + (t - t0) / (t1 - t0) * W, Y = (v) => T + (1 - (v - o.yMin) / (o.yMax - o.yMin)) * H;
+  const ink = css("--md-on-surface-variant"), grid = css("--md-outline-variant"), series = css("--md-primary");
+  x.font = "500 11px " + css("--font-brand");
+  const pts = o.pts;
+  const bandCss = { charge: css("--band-charge"), hold: css("--band-hold"), thermal: css("--band-thermal") };
+  for (let i = 0; i < pts.length - 1; i++) {
+    const b = pts[i].band; if (!b || pts[i + 1].t - pts[i].t > 3 * 3600) continue;
+    x.fillStyle = bandCss[b]; const a = X(pts[i].t), e = X(pts[i + 1].t); x.fillRect(a, T, Math.max(1, e - a), H);
+  }
+  x.strokeStyle = grid; x.lineWidth = 1; x.fillStyle = ink; x.textAlign = "right"; x.textBaseline = "middle";
+  niceTicks(o.yMin, o.yMax, 4).forEach((v) => { const y = Math.round(Y(v)) + .5; x.beginPath(); x.moveTo(L, y); x.lineTo(L + W, y); x.stroke(); x.fillText(o.tick ? o.tick(v) : String(v), L - 8, y); });
+  x.textAlign = "center"; x.textBaseline = "top";
+  const days = (t1 - t0) / 86400, stepH = days <= 1.05 ? 6 : days <= 3.1 ? 12 : days <= 7.1 ? 24 : 24 * 6;
+  const start = new Date(t0 * 1000); start.setMinutes(0, 0, 0);
+  if (stepH >= 24) start.setHours(0); else start.setHours(Math.ceil(start.getHours() / stepH) * stepH);
+  for (let d = new Date(start); d.getTime() / 1000 <= t1; d.setHours(d.getHours() + stepH)) {
+    const tt = d.getTime() / 1000; if (tt < t0) continue;
+    x.fillText(stepH >= 24 ? d.toLocaleDateString("it-IT", { day: "numeric", month: "short" }) : String(d.getHours()).padStart(2, "0") + ":00", X(tt), T + H + 7);
+  }
+  (o.refs || []).forEach((r) => {
+    if (r.v < o.yMin || r.v > o.yMax) return;
+    const y = Math.round(Y(r.v)) + .5; x.setLineDash([5, 5]); x.strokeStyle = css("--md-outline"); x.lineWidth = 1.5;
+    x.beginPath(); x.moveTo(L, y); x.lineTo(L + W, y); x.stroke(); x.setLineDash([]);
+    x.textAlign = "right"; x.textBaseline = "bottom"; const tw = x.measureText(r.label).width;
+    x.fillStyle = css("--md-surface-container"); x.fillRect(L + W - tw - 10, y - 16, tw + 10, 15);
+    x.fillStyle = ink; x.fillText(r.label, L + W - 4, y - 3);
+  });
+  x.strokeStyle = series; x.lineWidth = 2.5; x.lineJoin = "round"; x.lineCap = "round"; x.beginPath();
+  let pen = false;
+  for (let i = 0; i < pts.length; i++) {
+    const p = pts[i]; if (i > 0 && p.t - pts[i - 1].t > 3 * 3600) pen = false;
+    if (!pen) { x.moveTo(X(p.t), Y(p.v)); pen = true; } else x.lineTo(X(p.t), Y(p.v));
+  }
+  x.stroke();
+  if (ch.hover !== null && pts[ch.hover]) {
+    const p = pts[ch.hover], px = X(p.t), py = Y(p.v);
+    x.strokeStyle = css("--md-on-surface"); x.lineWidth = 1; x.beginPath(); x.moveTo(Math.round(px) + .5, T); x.lineTo(Math.round(px) + .5, T + H); x.stroke();
+    x.fillStyle = series; x.strokeStyle = css("--md-surface-container"); x.lineWidth = 3; x.beginPath(); x.arc(px, py, 6, 0, Math.PI * 2); x.fill(); x.stroke();
+  }
+  if (!pts.length) { x.fillStyle = ink; x.textAlign = "center"; x.textBaseline = "middle"; x.fillText("Nessun dato: il primo campione arriva entro pochi minuti", L + W / 2, T + H / 2); }
+}
+let chartDays = 1;
+async function renderCharts() {
+  Object.values(charts).forEach((c) => setLoading(c, true));
+  await loadStats(chartDays);
+  Object.values(charts).forEach((c) => setLoading(c, false));
+  bandColors();
+  const now = Date.now() / 1000, t0 = now - chartDays * 86400, rows = STATS.filter((r) => r.ts >= t0);
+  const mk = (f) => rows.map((r) => ({ t: r.ts, v: f(r), band: bandOf(r), label: STATE_LABEL[r.state] || r.state }));
+  const mn = num(CFG.MIN_LEVEL, 20), mx = num(CFG.MAX_LEVEL, 80);
+  charts.cCap.opts = { pts: mk((r) => r.cap), t0, t1: now, yMin: 0, yMax: 100, tick: (v) => v + "%", fmt: (v) => v + "%",
+    refs: [{ v: mn, label: "MIN " + mn + "%" }, { v: mx, label: "MAX " + mx + "%" }] };
+  const tPts = mk((r) => r.temp_dec / 10), tv = tPts.map((p) => p.v), soft = num(CFG.TEMP_SOFT_C, 0), stop = num(CFG.TEMP_STOP_C, 39);
+  charts.cTemp.opts = { pts: tPts, t0, t1: now, yMin: Math.floor(Math.min(25, ...tv) / 5) * 5, yMax: Math.ceil(Math.max(stop + 2, ...tv) / 5) * 5,
+    fmt: (v) => it(v, 1) + " °C", refs: [soft > 0 ? { v: soft, label: "ridotta " + soft + "°" } : null, { v: stop, label: "stop " + stop + "°" }].filter(Boolean) };
+  const cPts = mk((r) => Math.abs(r.current_ma)), cMax = Math.max(500, ...cPts.map((p) => p.v)), top = niceTicks(0, cMax, 4).slice(-1)[0];
+  charts.cCurr.opts = { pts: cPts, t0, t1: now, yMin: 0, yMax: top < cMax ? cMax * 1.1 : top, fmt: (v) => v + " mA",
+    tick: (v) => v >= 1000 ? it(v / 1000, v % 1000 ? 1 : 0) + "k" : String(v) };
+  const last = rows[rows.length - 1];
+  $("cCapNow").textContent = last ? "ora " + last.cap + "%" : "";
+  $("cTempNow").textContent = last ? "ora " + it(last.temp_dec / 10, 1) + " °C" : "";
+  $("cCurrNow").textContent = last ? "ora " + Math.abs(last.current_ma) + " mA" : "";
+  Object.values(charts).forEach(draw);
+}
+
+// ============================================================ statistiche
+let statDays = 7;
+function item(opts) {
+  const d = document.createElement("div"); d.className = "item";
+  if (opts.icon) d.insertAdjacentHTML("beforeend", '<span class="lead"' + (opts.lead ? ' style="' + opts.lead + '"' : "") + ">" + svgIcon(opts.icon) + "</span>");
+  if (opts.dot) { const s = document.createElement("span"); s.className = "dot"; s.style.background = opts.dot; d.append(s); }
+  const t = document.createElement("div"); t.className = "txt";
+  const a = document.createElement("div"); a.className = "title-m"; a.textContent = opts.title; t.append(a);
+  if (opts.sub) { const b = document.createElement("div"); b.className = "body-m s"; b.textContent = opts.sub; t.append(b); }
+  d.append(t);
+  if (opts.value !== undefined) { const v = document.createElement("span"); v.className = "trail title-m em num"; v.textContent = opts.value; d.append(v); }
+  return d;
+}
+async function renderStats() {
+  await loadStats(statDays);
+  const health = parseCSV(await cli("health"));
+  const now = Date.now() / 1000, rows = STATS.filter((r) => r.ts >= now - statDays * 86400);
+  const drain = { 0: 0, 1: 0 }, dtime = { 0: 0, 1: 0 }, stime = {}; let total = 0, tSum = 0, tN = 0, tMax = -Infinity, sessions = 0, pctIn = 0;
+  for (let i = 0; i < rows.length - 1; i++) {
+    const a = rows[i], b = rows[i + 1], dt = (b.ts - a.ts) / 3600; if (dt <= 0 || dt > 6) continue;
+    if (!a.usb && !b.usb && b.cap <= a.cap) { drain[a.screen] += a.cap - b.cap; dtime[a.screen] += dt; }
+    const key = !a.usb ? "UNPLUGGED" : CHARGING_STATES.has(a.state) ? "CHARGE" : a.state === "HOLD" ? "HOLD" : a.state === "THERMAL_PAUSE" ? "THERMAL" : "OTHER";
+    stime[key] = (stime[key] || 0) + dt; total += dt;
+    if (!a.usb && b.usb) sessions++; if (b.cap > a.cap) pctIn += b.cap - a.cap;
+  }
+  rows.forEach((r) => { if (CHARGING_STATES.has(r.state) && r.usb) { tSum += r.temp_dec; tN++; tMax = Math.max(tMax, r.temp_dec); } });
+  const rate = (k) => dtime[k] > .25 ? drain[k] / dtime[k] : NaN, allT = dtime[0] + dtime[1], rall = allT > .5 ? (drain[0] + drain[1]) / allT : NaN;
+  $("sAuto").textContent = Number.isFinite(rall) && rall > 0 ? fmtDur(100 / rall) : "—";
+  const sd = $("sDrain"); sd.innerHTML = "";
+  const ron = rate(1), roff = rate(0);
+  sd.append(item({ icon: "monitoring", title: "Schermo acceso", sub: allT ? fmtDur(dtime[1]) + " nel periodo" : "", value: Number.isFinite(ron) ? it(ron, 1) + " %/h" : "—" }));
+  sd.append(item({ icon: "schedule", title: "Schermo spento", sub: allT ? fmtDur(dtime[0]) + " nel periodo" : "", value: Number.isFinite(roff) ? it(roff, 2) + " %/h" : "—" }));
+  sd.append(item({ icon: "trending_down", title: "Media a cavo scollegato", value: Number.isFinite(rall) ? it(rall, 1) + " %/h" : "—" }));
+
+  const parts = [["CHARGE", "In carica", "var(--md-primary)"], ["HOLD", "Collegato, sospesa", "var(--md-outline)"],
+                 ["THERMAL", "Pausa termica", "var(--md-error)"], ["UNPLUGGED", "Scollegato", "var(--md-tertiary)"]];
+  const bar = $("sBar"), st = $("sTime"); bar.innerHTML = ""; st.innerHTML = "";
+  const lst = document.createElement("div"); lst.className = "seg-list"; lst.style.margin = "12px -4px 4px";
+  parts.forEach(([k, lbl, col]) => {
+    const v = stime[k] || 0;
+    if (total > 0 && v > 0) { const seg = document.createElement("div"); seg.style.flexGrow = String(v); seg.style.background = col; bar.append(seg); }
+    const it2 = item({ dot: col, title: lbl, value: total > 0 ? Math.round(v / total * 100) + "%" : "—", sub: total > 0 ? fmtDur(v) : "" });
+    it2.style.background = "var(--md-surface-container-high)"; it2.style.minHeight = "56px"; lst.append(it2);
+  });
+  st.append(lst);
+
+  const sc = $("sCharge"); sc.innerHTML = "";
+  sc.append(item({ icon: "cable", title: "Collegamenti del cavo", value: String(sessions) }));
+  sc.append(item({ icon: "battery_charging_full", title: "Percentuale caricata", sub: "≈ " + it(pctIn / 100, 1) + " cicli nel periodo", value: pctIn + "%" }));
+  sc.append(item({ icon: "device_thermostat", title: "Temperatura in carica", sub: tN ? "massima " + it(tMax / 10, 1) + " °C" : "", value: tN ? it(tSum / tN / 10, 1) + " °C" : "—" }));
+  sc.append(item({ icon: "cycle", title: "Cicli equivalenti totali", value: it(num(S.PCT_IN, 0) / 100, 1) }));
+
+  const hh = $("sHealth"); hh.innerHTML = "";
+  if (!health.length) hh.append(item({ icon: "ecg_heart", title: "Ancora nessun dato", sub: "Lo storico si riempie con una riga al giorno" }));
+  const step = Math.max(1, Math.ceil(health.length / 8));
+  health.filter((_, i) => (health.length - 1 - i) % step === 0).slice(-8).reverse().forEach((r) => {
+    hh.append(item({ icon: "ecg_heart", title: new Date(r.date).toLocaleDateString("it-IT", { day: "numeric", month: "long", year: "numeric" }),
+      sub: (r.charge_full_mah > 0 ? r.charge_full_mah + " mAh" : "—") + (Number.isFinite(r.cycle_count) ? " · " + r.cycle_count + " cicli" : ""),
+      value: Number.isFinite(r.soh) ? r.soh + "%" : "—" }));
+  });
+}
+
+// =========================================================== impostazioni
+const FIELDS = [
+  { g: "Generale" },
+  { k: "ENABLED", t: "sw", l: "Modulo attivo", d: "Spento: carica e velocità standard", icon: "power_settings_new" },
+  { k: "NOTIFY", t: "sw", l: "Notifiche", d: "Soglia raggiunta, pausa termica, carica smart", icon: "notifications" },
+  { g: "Soglie" },
+  { k: "MAX_LEVEL", t: "sl", l: "Soglia massima", d: "La carica si ferma qui", u: "%", min: 50, max: 100, icon: "battery_full" },
+  { k: "MIN_LEVEL", t: "sl", l: "Soglia minima", d: "Se resti collegato, la carica riparte qui", u: "%", min: 15, max: 95, icon: "battery_alert" },
+  { k: "CHARGE_ON_PLUG", t: "sw", l: "Carica quando colleghi", d: "Parte subito se sei sotto il massimo meno il delta", icon: "cable" },
+  { k: "PLUG_RESUME_DELTA", t: "sl", l: "Delta al collegamento", d: "Con 80% e 5: carica se colleghi sotto il 75%", u: "%", min: 1, max: 30, dep: "CHARGE_ON_PLUG" },
+  { g: "Corrente" },
+  { k: "MAX_CHARGE_MA", t: "sl", l: "Corrente massima", d: "Tutto a destra: velocità originale (67 W)", u: "mA", min: 500, max: 6000, step: 100, zeroAtMax: true, icon: "electric_bolt" },
+  { g: "Temperatura" },
+  { k: "TEMP_SOFT_C", t: "sl", l: "Riduci la corrente da", d: "Tutto a sinistra: disattivato", u: "°C", min: 33, max: 45, zeroAtMin: true, icon: "heat" },
+  { k: "SOFT_CHARGE_MA", t: "sl", l: "Corrente ridotta", u: "mA", min: 500, max: 3000, step: 100 },
+  { k: "TEMP_STOP_C", t: "sl", l: "Ferma la carica a", u: "°C", min: 30, max: 48, icon: "device_thermostat" },
+  { k: "TEMP_RESUME_C", t: "sl", l: "Riprendi sotto", u: "°C", min: 25, max: 47 },
+  { g: "Carica al 100%" },
+  { k: "FORCE_FULL_ONCE", t: "sw", l: "Carica al 100% una tantum", d: "Si disattiva da sola al 100%", icon: "battery_charging_full" },
+  { k: "FORCE_FULL_EXPIRE_H", t: "sl", l: "Scadenza", d: "Si annulla dopo queste ore (0 = mai)", u: "h", min: 0, max: 72 },
+  { g: "Carica smart" },
+  { k: "SMART_CHARGE", t: "sw", l: "Carica smart", d: "Di notte tiene il massimo, arriva al 100% per la sveglia", icon: "alarm" },
+  { k: "SMART_SRC", t: "seg", l: "Orario obiettivo", o: [["alarm", "Sveglia"], ["fixed", "Orario fisso"]], dep: "SMART_CHARGE" },
+  { k: "SMART_FIXED_TIME", t: "time", l: "Orario fisso", d: "Ora a cui vuoi il 100%", depFixed: true },
+  { k: "SMART_BUFFER_MIN", t: "sl", l: "Margine", d: "Minuti di anticipo extra", u: "min", min: 0, max: 120, step: 5, dep: "SMART_CHARGE" },
+  { g: "Avanzate" },
+  { k: "STATS_INTERVAL_MIN", t: "sl", l: "Campione statistiche ogni", d: "0 = non registrare", u: "min", min: 0, max: 30, icon: "bar_chart" },
+  { k: "POLL_CHARGING_SEC", t: "sl", l: "Controllo in carica", u: "s", min: 10, max: 120, step: 5, icon: "timer" },
+  { k: "POLL_DISCHARGING_SEC", t: "sl", l: "Controllo in sospensione", u: "s", min: 15, max: 300, step: 5 },
+  { k: "POLL_UNPLUGGED_SEC", t: "sl", l: "Controllo a cavo scollegato", u: "s", min: 10, max: 120, step: 5 }
+];
+const ctl = {}; let DRAFT = {};
+function fmtVal(f, v) {
+  if (f.zeroAtMax && (v === 0 || v > f.max)) return "Max";
+  if (f.zeroAtMin && v === 0) return "Off";
+  return v + (f.u ? " " + f.u : "");
+}
+function buildForm() {
+  const form = $("form"); form.innerHTML = ""; let list = null;
+  FIELDS.forEach((f) => {
+    if (f.g) {
+      const h = document.createElement("h2"); h.className = "section-h title-s"; h.textContent = f.g; form.append(h);
+      list = document.createElement("div"); list.className = "seg-list settings-group"; form.append(list); return;
+    }
+    const row = document.createElement("div"); row.className = "item"; const top = document.createElement("div"); top.className = "top";
+    top.style.cssText = "display:flex;align-items:center;gap:16px;width:100%";
+    if (f.icon) top.insertAdjacentHTML("beforeend", '<span class="lead">' + svgIcon(f.icon) + "</span>");
+    const txt = document.createElement("div"); txt.className = "txt";
+    const b = document.createElement("div"); b.className = "title-m"; b.textContent = f.l; txt.append(b);
+    if (f.d) { const s = document.createElement("div"); s.className = "body-m s"; s.textContent = f.d; txt.append(s); }
+    const err = document.createElement("div"); err.className = "body-s err"; txt.append(err);
+    top.append(txt);
+    const c = { f, row, err };
+    if (f.t === "sw") {
+      row.classList.add("tap");
+      const sw = document.createElement("label"); sw.className = "switch";
+      sw.innerHTML = '<input type="checkbox" role="switch"><span class="track"></span><span class="thumb">' + svgIcon("check") + "</span>";
+      c.inp = sw.querySelector("input"); c.inp.setAttribute("aria-label", f.l);
+      c.inp.addEventListener("change", () => { DRAFT[f.k] = c.inp.checked ? "1" : "0"; onDraft(); });
+      top.append(sw); row.append(top);
+      top.addEventListener("click", (e) => { if (e.target !== c.inp && !e.target.closest(".switch")) { c.inp.checked = !c.inp.checked; c.inp.dispatchEvent(new Event("change")); } });
+    } else if (f.t === "sl") {
+      row.classList.add("col");
+      const v = document.createElement("span"); v.className = "val label-l num"; top.append(v); c.val = v;
+      const sl = document.createElement("div"); sl.className = "slider";
+      sl.innerHTML = '<input type="range"><span class="a"></span><span class="b"></span><span class="stop"></span><span class="h"></span>';
+      const inp = sl.querySelector("input");
+      const lo = f.zeroAtMin ? f.min - (f.step || 1) : f.min, hi = f.zeroAtMax ? f.max + (f.step || 1) : f.max;
+      inp.min = lo; inp.max = hi; inp.step = f.step || 1; inp.setAttribute("aria-label", f.l);
+      c.inp = inp; c.sl = sl; c.lo = lo; c.hi = hi;
+      inp.addEventListener("input", () => {
+        let n = Number(inp.value);
+        if (f.zeroAtMax && n > f.max) n = 0; if (f.zeroAtMin && n < f.min) n = 0;
+        DRAFT[f.k] = String(n); paintSlider(c); onDraft();
+      });
+      ["pointerdown", "touchstart"].forEach((e) => inp.addEventListener(e, () => sl.classList.add("drag"), { passive: true }));
+      ["pointerup", "pointercancel", "touchend", "blur"].forEach((e) => inp.addEventListener(e, () => sl.classList.remove("drag")));
+      row.append(top, sl);
+    } else if (f.t === "seg") {
+      row.classList.add("col"); row.append(top);
+      const grp = document.createElement("div"); grp.className = "connected"; grp.id = "seg_" + f.k; grp.style.margin = "0"; row.append(grp);
+      c.grp = grp;
+    } else if (f.t === "time") {
+      const inp = document.createElement("input"); inp.type = "time"; inp.className = "time-in"; inp.setAttribute("aria-label", f.l);
+      inp.addEventListener("input", () => { const m = /^(\d{1,2}):(\d{2})$/.exec(inp.value); DRAFT.SMART_FIXED_TIME = m ? String(Number(m[1]) * 100 + Number(m[2]) || 1) : ""; onDraft(); });
+      c.inp = inp; top.append(inp); row.append(top);
+    }
+    ctl[f.k] = c; list.append(row);
+  });
+}
+function paintSlider(c) {
+  const f = c.f; let v = Number(DRAFT[f.k]);
+  let pos = v; if (f.zeroAtMax && (v === 0 || v > f.max)) pos = c.hi; if (f.zeroAtMin && v === 0) pos = c.lo;
+  c.inp.value = pos;
+  const p = Math.max(0, Math.min(1, (pos - c.lo) / (c.hi - c.lo)));
+  c.sl.style.setProperty("--p", p.toFixed(4)); c.sl.classList.toggle("zero", p <= 0.001); c.sl.classList.toggle("full", p >= 0.999);
+  c.val.textContent = fmtVal(f, v);
+}
+function fillForm() {
+  DRAFT = {}; FIELDS.forEach((f) => { if (f.k && f.k !== "SMART_SRC") DRAFT[f.k] = CFG[f.k] !== undefined ? String(num(CFG[f.k], 0)) : "0"; });
+  DRAFT.SMART_SRC = num(CFG.SMART_FIXED_TIME, 0) > 0 ? "fixed" : "alarm";
+  Object.values(ctl).forEach((c) => {
+    const f = c.f; c.err.textContent = "";
+    if (f.t === "sw") c.inp.checked = DRAFT[f.k] === "1";
+    else if (f.t === "sl") paintSlider(c);
+    else if (f.t === "seg") connected(c.grp.id, f.o, DRAFT.SMART_SRC, (v) => { DRAFT.SMART_SRC = v; if (v === "alarm") DRAFT.SMART_FIXED_TIME = "0"; else if (DRAFT.SMART_FIXED_TIME === "0") DRAFT.SMART_FIXED_TIME = "700"; syncTime(); onDraft(); });
+    else if (f.t === "time") syncTime();
+  });
+  onDraft();
+}
+function syncTime() {
+  const n = num(DRAFT.SMART_FIXED_TIME, 0), v = n > 0 ? n : 700;
+  ctl.SMART_FIXED_TIME.inp.value = String(Math.floor(v / 100)).padStart(2, "0") + ":" + String(v % 100).padStart(2, "0");
+}
+function validate() {
+  const errs = {}; const n = (k) => Number(DRAFT[k]);
+  if (n("MIN_LEVEL") > n("MAX_LEVEL") - 5) errs.MIN_LEVEL = "Almeno 5 punti sotto la soglia massima";
+  if (n("TEMP_RESUME_C") >= n("TEMP_STOP_C")) errs.TEMP_RESUME_C = "Deve essere sotto la temperatura di stop";
+  if (n("TEMP_SOFT_C") > 0 && n("TEMP_SOFT_C") >= n("TEMP_STOP_C")) errs.TEMP_SOFT_C = "Deve partire prima dello stop";
+  if (DRAFT.SMART_SRC === "fixed" && !(n("SMART_FIXED_TIME") > 0)) errs.SMART_FIXED_TIME = "Orario non valido";
+  return errs;
+}
+function changedKeys() {
+  return Object.keys(DRAFT).filter((k) => k !== "SMART_SRC" && DRAFT[k] !== "" && String(num(CFG[k], 0)) !== DRAFT[k]);
+}
+function onDraft() {
+  const on = (k) => DRAFT[k] === "1";
+  const vis = (k, v) => { if (ctl[k]) ctl[k].row.hidden = !v; };
+  vis("PLUG_RESUME_DELTA", on("CHARGE_ON_PLUG")); vis("SMART_SRC", on("SMART_CHARGE")); vis("SMART_BUFFER_MIN", on("SMART_CHARGE"));
+  vis("SMART_FIXED_TIME", on("SMART_CHARGE") && DRAFT.SMART_SRC === "fixed"); vis("SOFT_CHARGE_MA", num(DRAFT.TEMP_SOFT_C, 0) > 0);
+  vis("FORCE_FULL_EXPIRE_H", true);
+  const errs = validate(); Object.values(ctl).forEach((c) => { c.err.textContent = errs[c.f.k] || ""; });
+  const ch = changedKeys();
+  $("toolbar").classList.toggle("show", ch.length > 0);
+  $("dirtyCount").textContent = ch.length === 1 ? "1 modifica" : ch.length + " modifiche";
+  $("fSave").disabled = Object.keys(errs).length > 0;
+}
+async function saveForm() {
+  if (Object.keys(validate()).length) return;
+  const ch = changedKeys(); if (!ch.length) return;
+  $("fSave").disabled = true;
+  try {
+    const r = await cli("set " + ch.map((k) => k + " " + DRAFT[k]).join(" "));
+    if (r.trim().startsWith("OK")) { snack(ch.length === 1 ? "Impostazione salvata" : ch.length + " impostazioni salvate"); await loadConfig(); fillForm(); setTimeout(refreshStatus, 800); }
+    else snack(r.trim() || "Errore nel salvataggio");
+  } catch (e) { snack("Errore: " + e.message); }
+  $("fSave").disabled = false;
+}
+
+// ==================================================================== log
+async function renderLog() {
+  const box = $("logBox"); box.innerHTML = "";
+  const lines = (await cli("log 120")).trim().split("\n").filter(Boolean).reverse();
+  if (!lines.length) { box.textContent = "Nessun evento ancora."; return; }
+  lines.forEach((l) => {
+    const m = /^\[(\d{4}-\d{2}-\d{2}) (\d{2}:\d{2}):\d{2}\] (.*)$/.exec(l);
+    const row = document.createElement("div"); row.className = "l";
+    const t = document.createElement("span"); t.className = "t"; t.textContent = m ? m[2] : "";
+    t.title = m ? m[1] : "";
+    const s = document.createElement("span"); s.textContent = m ? m[3] : l;
+    row.append(t, s); box.append(row);
+  });
+}
+
+// ============================================================ navigazione
+const PAGES = [["p-status", "Stato", "battery_android_frame_bolt"], ["p-charts", "Grafici", "monitoring"], ["p-stats", "Statistiche", "bar_chart"],
+               ["p-settings", "Impostazioni", "tune"], ["p-log", "Log", "receipt_long"]];
+let current = "p-status";
+function buildNav() {
+  const nav = $("navIn");
+  PAGES.forEach(([id, label, ic]) => {
+    const b = document.createElement("button"); b.dataset.p = id; if (id === current) b.setAttribute("aria-current", "page");
+    b.innerHTML = '<span class="ind sl">' + svgIcon(ic, "o") + svgIcon((ICONS[ic + "_fill"] ? ic + "_fill" : ic), "f") + '</span><span class="lbl"></span>';
+    b.querySelector(".lbl").textContent = label;
+    b.addEventListener("click", () => show(id)); nav.append(b);
+  });
+}
+function show(page) {
+  if (page === current) { window.scrollTo({ top: 0, behavior: REDUCED ? "auto" : "smooth" }); return; }
+  current = page;
+  document.querySelectorAll("nav.navbar button").forEach((b) => { if (b.dataset.p === page) b.setAttribute("aria-current", "page"); else b.removeAttribute("aria-current"); });
+  document.querySelectorAll("section.page").forEach((s) => s.classList.toggle("active", s.id === page));
+  window.scrollTo(0, 0);
+  $("toolbar").classList.toggle("show", page === "p-settings" && changedKeys().length > 0);
+  if (page === "p-charts") renderCharts();
+  if (page === "p-stats") renderStats();
+  if (page === "p-settings") loadConfig().then(fillForm);
+  if (page === "p-log") renderLog();
+}
+async function act(btn, args, msg) {
+  btn.disabled = true;
+  try { const r = await cli(args); snack(typeof msg === "function" ? msg(r) : msg); } catch (e) { snack("Errore: " + e.message); }
+  btn.disabled = false; await loadConfig(); setTimeout(refreshStatus, 700);
+}
+
+// ============================================================ dati demo
+const Mock = (() => {
+  const cfg = { ENABLED: 1, MIN_LEVEL: 20, MAX_LEVEL: 80, CHARGE_ON_PLUG: 1, PLUG_RESUME_DELTA: 5, MAX_CHARGE_MA: 2500, TEMP_SOFT_C: 36, SOFT_CHARGE_MA: 1500,
+    TEMP_STOP_C: 39, TEMP_RESUME_C: 35, FORCE_FULL_ONCE: 0, FORCE_FULL_EXPIRE_H: 24, SMART_CHARGE: 1, SMART_FIXED_TIME: 0, SMART_BUFFER_MIN: 30, NOTIFY: 1,
+    STATS_INTERVAL_MIN: 5, POLL_CHARGING_SEC: 25, POLL_DISCHARGING_SEC: 60, POLL_UNPLUGGED_SEC: 20 };
+  let csv = null, health = null;
+  const rnd = (seed) => { let s = seed; return () => (s = (s * 16807) % 2147483647) / 2147483647; };
+  function gen() {
+    const r = rnd(42), now = Math.floor(Date.now() / 1000), start = now - 30 * 86400;
+    const rows = ["ts,cap,current_ma,voltage_mv,temp_dec,usb,state,screen"]; let cap = 64, temp = 300, mode = "DISCHARGING";
+    for (let t = start; t <= now; t += 300) {
+      const d = new Date(t * 1000), h = d.getHours() + d.getMinutes() / 60;
+      const plugged = h >= 23.2 || h < 6.9 || (d.getDay() === 3 && h > 15 && h < 16.5);
+      const screen = !plugged && ((h > 7.3 && h < 8.5) || (h > 12.5 && h < 13.6) || (h > 18 && h < 22.5) || r() < .18) ? 1 : 0;
+      let state, cur;
+      if (!plugged) { state = "UNPLUGGED"; mode = cap >= 80 ? "DISCHARGING" : mode; cap -= screen ? .36 + r() * .2 : .05 + r() * .03; cur = screen ? 520 + r() * 400 : 45 + r() * 40;
+        temp += ((screen ? 320 : 290) - temp) * .2 + (r() - .5) * 8; if (cap < 75) mode = "CHARGING"; }
+      else {
+        if (mode === "CHARGING" && cap >= 80) mode = "DISCHARGING";
+        if (h > 5.4 && h < 6.9 && cap < 100) { state = "SMART"; cap += .95; cur = 2400; temp += (345 - temp) * .2; }
+        else if (mode === "CHARGING") { const hot = temp >= 360; state = hot ? "CHARGING_SOFT" : "CHARGING"; cur = hot ? 1500 : 2500; cap += hot ? .55 : .92; temp += (370 - temp) * .12 + (r() - .5) * 6; }
+        else { state = "HOLD"; cur = 30 + r() * 20; cap -= .04; temp += (295 - temp) * .2; }
+      }
+      cap = Math.max(16, Math.min(100, cap));
+      rows.push([t, Math.round(cap), -Math.round(cur), 3900 + Math.round(cap * 4.2), Math.round(temp), plugged ? 1 : 0, state, screen].join(","));
+    }
+    csv = rows; health = ["date,soh,charge_full_mah,design_mah,cycle_count,pct_in"];
+    for (let i = 30; i >= 0; i--) { const d = new Date((now - i * 86400) * 1000).toISOString().slice(0, 10);
+      health.push([d, 92 - (i < 12 ? 0 : 1), 4610 - Math.round((30 - i) * .9), 5000, 318 + Math.round((30 - i) * .7), (30 - i) * 64].join(",")); }
+  }
+  function exec(cmd) {
+    if (!csv) gen();
+    const args = cmd.replace(CLI, "").trim().split(/\s+/), c = args[0]; let out = "";
+    if (c === "status") {
+      const al2 = new Date(); al2.setDate(al2.getDate() + (al2.getHours() >= 7 ? 1 : 0)); al2.setHours(7, 0, 0, 0);
+      const st = !cfg.ENABLED ? "PAUSED" : cfg.FORCE_FULL_ONCE ? "FULL_ONCE" : (Mock.state || "CHARGING");
+      out = ["DAEMON=4127", "VERSION=v1.0.0", "MAGISK_DISABLED=0", "STATE=" + st, "MODE=CHARGING", "CAPACITY=" + (Mock.cap || 73), "CURRENT_MA=-2480", "VOLTAGE_MV=4185",
+        "TEMP_DEC=338", "BAT_STATUS=" + (st === "HOLD" || st === "PAUSED" ? "Not charging" : "Charging"), "USB_ONLINE=1", "INPUT_SUSPEND=0", "LIMIT_MA=" + (cfg.MAX_CHARGE_MA || 12200), "ORIG_MAX_MA=12200",
+        "MIN_LEVEL=" + cfg.MIN_LEVEL, "MAX_LEVEL=" + cfg.MAX_LEVEL, "SOFT_ACTIVE=0", "THERMAL_PAUSED=0", "FORCE_FULL=" + cfg.FORCE_FULL_ONCE, "SMART_CHARGE=" + cfg.SMART_CHARGE,
+        "SMART_TARGET=" + Math.floor(al2 / 1000), "SMART_START=" + (Math.floor(al2 / 1000) - 5400), "PCT_IN=1934", "PCT_OUT=1890",
+        "STATS_SINCE=" + (Math.floor(Date.now() / 1000) - 30 * 86400), "UPDATED=0", "SOH=92", "CHARGE_FULL_MAH=4583", "DESIGN_MAH=5000", "CYCLE_COUNT=339"].join("\n");
+    } else if (c === "config") out = Object.entries(cfg).map(([k, v]) => k + "=" + v).join("\n");
+    else if (c === "set") { for (let i = 1; i + 1 < args.length; i += 2) cfg[args[i]] = Number(args[i + 1]); out = "OK"; }
+    else if (c === "toggle") { cfg[args[1]] = cfg[args[1]] ? 0 : 1; out = args[1] + "=" + cfg[args[1]]; }
+    else if (c === "stats") out = [csv[0]].concat(csv.slice(-(Number(args[1] || 7) * 288))).join("\n");
+    else if (c === "health") out = health.join("\n");
+    else if (c === "log") out = ["[2026-11-24 06:52:11] Carica smart completata: 100% pronto per le 07:00.", "[2026-11-24 07:12:40] Stato: UNPLUGGED | Batteria: 100% | Temp: 30°C | Limite: 2500 mA",
+      "[2026-11-24 23:14:02] Cavo collegato a 41% (< 75%): carica fino all'80%.", "[2026-11-24 23:14:02] Stato: CHARGING | Batteria: 41% | Temp: 29°C | Limite: 2500 mA"].join("\n");
+    else if (c === "probe") out = "== Nodi di controllo ricarica trovati ==\n[rw] /sys/class/qcom-battery/input_suspend = 0\n(demo)";
+    else if (c === "theme") out = "THEME=" + (window.VCL_DEMO_THEME || "");
+    else if (c === "export" || c === "restart") out = "OK";
+    return { errno: 0, stdout: out, stderr: "" };
+  }
+  return { exec };
+})();
+
+// =================================================================== avvio
+(async function init() {
+  hydrateIcons(document);
+  if (!HAS_KSU) $("demoBanner").classList.add("show");
+  badge = new Morph($("badgePath"), 28);
+  buildNav();
+  connected("rangeSeg", RANGES, chartDays, (d) => { chartDays = d; renderCharts(); });
+  connected("rangeSeg2", RANGES, statDays, (d) => { statDays = d; renderStats(); });
+  ["cCap", "cTemp", "cCurr"].forEach(setupChart);
+  buildForm();
+  window.addEventListener("scroll", () => $("appbar").classList.toggle("scrolled", window.scrollY > 40), { passive: true });
+  $("btnRefresh").addEventListener("click", () => { refreshStatus(); if (current === "p-charts") { statsDays = 0; renderCharts(); } if (current === "p-stats") { statsDays = 0; renderStats(); } if (current === "p-log") renderLog(); });
+  $("aFull").addEventListener("click", (e) => act(e.currentTarget, "toggle FORCE_FULL_ONCE", (r) => r.includes("=1") ? "Carica al 100% attivata" : "Carica al 100% annullata"));
+  $("aPause").addEventListener("click", (e) => act(e.currentTarget, "toggle ENABLED", (r) => r.includes("=0") ? "Modulo in pausa" : "Modulo riattivato"));
+  $("aRestart").addEventListener("click", (e) => act(e.currentTarget, "restart", (r) => r.startsWith("OK") ? "Demone avviato" : "Avvio non riuscito"));
+  $("aExport").addEventListener("click", (e) => act(e.currentTarget, "export", (r) => r.startsWith("OK") ? "Salvati in /sdcard/VeuxChargeLimiter" : "Esportazione non riuscita"));
+  $("fSave").addEventListener("click", saveForm); $("fReset").addEventListener("click", fillForm);
+  $("lRefresh").addEventListener("click", renderLog);
+  $("pProbe").addEventListener("click", async () => { $("probeBox").textContent = (await cli("probe")).trim(); });
+  window.addEventListener("resize", () => Object.values(charts).forEach(draw));
+  window.matchMedia("(prefers-color-scheme: dark)").addEventListener("change", () => { bandColors(); Object.values(charts).forEach(draw); });
+  document.addEventListener("visibilitychange", () => { if (!document.hidden && current === "p-status") refreshStatus(); });
+  try { await loadConfig(); } catch (e) {}
+  await applyDynamicColor();
+  bandColors();
+  await refreshStatus();
+  setInterval(() => { if (current === "p-status" && !document.hidden) refreshStatus(); }, 5000);
+})();
+</script>
+</body>
+</html>

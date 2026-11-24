@@ -1,0 +1,59 @@
+name: Segnalazione bug
+description: Qualcosa non funziona come dovrebbe
+labels: ["bug"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Grazie per la segnalazione! Più dettagli metti, prima si risolve.
+        Il log si trova in `/sdcard/veux_charge_limiter.log` (o nella scheda **Log** della WebUI).
+  - type: textarea
+    id: what
+    attributes:
+      label: Cosa succede
+      description: Cosa ti aspettavi e cosa è successo invece.
+      placeholder: "Es. collegato al 50%, la carica non parte e lo stato resta HOLD"
+    validations:
+      required: true
+  - type: input
+    id: version
+    attributes:
+      label: Versione del modulo
+      placeholder: v1.0.0
+    validations:
+      required: true
+  - type: input
+    id: device
+    attributes:
+      label: Telefono e ROM
+      placeholder: "Redmi Note 11 Pro 5G (veux), PixelOS 17"
+    validations:
+      required: true
+  - type: dropdown
+    id: root
+    attributes:
+      label: Gestore root
+      options: [Magisk, KernelSU, KernelSU Next, APatch, Altro]
+    validations:
+      required: true
+  - type: textarea
+    id: log
+    attributes:
+      label: Log
+      description: Le righe del log intorno al problema.
+      render: text
+  - type: textarea
+    id: status
+    attributes:
+      label: Stato e nodi
+      description: |
+        Output di questi comandi da un terminale root:
+        `sh /data/adb/modules/veux_charge_limiter/cli.sh status`
+        `sh /data/adb/modules/veux_charge_limiter/cli.sh probe`
+      render: text
+  - type: textarea
+    id: config
+    attributes:
+      label: Configurazione
+      description: Contenuto di `/sdcard/veux_charge_limiter.conf` (solo le righe che hai cambiato va benissimo).
+      render: ini

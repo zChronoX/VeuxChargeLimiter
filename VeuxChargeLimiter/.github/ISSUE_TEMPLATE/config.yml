@@ -1,0 +1,5 @@
+blank_issues_enabled: true
+contact_links:
+  - name: Domande e aiuto
+    url: https://github.com/zChronoX/VeuxChargeLimiter/discussions
+    about: Per domande sull'uso, meglio le Discussions che una issue.

@@ -1,0 +1,9 @@
+# Output della build
+dist/
+
+# Sistema operativo / editor
+.DS_Store
+Thumbs.db
+.idea/
+.vscode/
+*.swp

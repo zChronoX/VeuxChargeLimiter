@@ -1,0 +1,57 @@
+name: Release
+
+# Si avvia quando fai il push di un tag vX.Y.Z (es. git tag v1.0.1 && git push origin v1.0.1)
+on:
+  push:
+    tags: ["v*.*.*"]
+
+permissions:
+  contents: write
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Il tag corrisponde a module.prop?
+        run: |
+          VERSION=$(sed -n 's/^version=//p' module/module.prop)
+          if [ "$VERSION" != "$GITHUB_REF_NAME" ]; then
+            echo "::error::Il tag è $GITHUB_REF_NAME ma module.prop dice $VERSION"
+            exit 1
+          fi
+
+      - name: Test
+        run: |
+          sudo apt-get update -qq && sudo apt-get install -y -qq mksh busybox
+          bash tools/test/run-tests.sh
+
+      - name: Build
+        run: bash tools/build.sh
+
+      - name: Note di rilascio dal CHANGELOG
+        run: |
+          V="${GITHUB_REF_NAME#v}"
+          awk -v v="$V" '
+            $0 ~ "^## \\[" v "\\]" { on = 1; next }
+            on && /^## / { exit }
+            on { print }
+          ' CHANGELOG.md > release-notes.md
+          {
+            echo
+            echo "---"
+            echo "**Installazione:** scarica \`VeuxChargeLimiter-$GITHUB_REF_NAME.zip\` qui sotto e installalo dall'app Magisk, KernelSU o APatch, poi riavvia."
+            echo
+            echo "SHA-256: \`$(cut -d' ' -f1 dist/*.sha256)\`"
+          } >> release-notes.md
+          cat release-notes.md
+
+      - name: Crea la release
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          gh release create "$GITHUB_REF_NAME" dist/*.zip dist/*.sha256 \
+            --title "Veux Smart Charge Limiter $GITHUB_REF_NAME" \
+            --notes-file release-notes.md \
+            --verify-tag

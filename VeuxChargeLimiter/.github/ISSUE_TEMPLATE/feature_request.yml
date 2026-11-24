@@ -1,0 +1,21 @@
+name: Proposta di funzionalità
+description: Un'idea per migliorare il modulo
+labels: ["enhancement"]
+body:
+  - type: textarea
+    id: problem
+    attributes:
+      label: Che problema risolve
+      description: Cosa vorresti poter fare che oggi non puoi fare?
+    validations:
+      required: true
+  - type: textarea
+    id: idea
+    attributes:
+      label: Come te lo immagini
+  - type: textarea
+    id: nodes
+    attributes:
+      label: Nodi del kernel (se serve)
+      description: Se l'idea dipende dall'hardware, incolla l'output di `cli.sh probe`.
+      render: text

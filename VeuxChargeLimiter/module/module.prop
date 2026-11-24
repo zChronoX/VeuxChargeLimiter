@@ -1,0 +1,7 @@
+id=veux_charge_limiter
+name=Veux Smart Charge Limiter
+version=v1.0.0
+versionCode=100
+author=zChronoX
+description=Limite di carica con isteresi, corrente max, protezione termica a gradini, carica smart sulla sveglia, statistiche e WebUI per Redmi Note 11 Pro 5G (veux). Premi Azione per stato e menu rapido.
+updateJson=https://raw.githubusercontent.com/zChronoX/VeuxChargeLimiter/main/update.json
